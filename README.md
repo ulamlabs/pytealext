@@ -10,8 +10,10 @@ Additional useful operations for Python
 `GlobalState` and `LocalState` allow for manipulating global and local state respectively.
 They both have the same interface.
 ```python
-user_counter = LocalState("UC", TealType.uint64)
+from pyteal import App, Bytes, Int
+from pytealext import LocalState
 
+user_counter = LocalState("UC", TealType.uint64)
 program = Seq(
     # increment using pyteal local state
     App.localPut(Int(0), Bytes("UC"), App.localGet(Int(0), Bytes("UC")) + Int(1)),
@@ -27,6 +29,8 @@ program = Seq(
 ## Example usage
 Example usage for `LazyAnd`:
 ```python
+from pytealext import LazyAnd
+
 # Evaluate fields of some transaction but don't panic if an argument down the line would panic
 validation = LazyAnd(
     Gtxn[0].type_enum() == TxnType.ApplicationCall,
