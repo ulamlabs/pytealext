@@ -29,8 +29,7 @@ class LazyAnd(Expr):
         if len(remaining) == 0:
             raise ValueError("list of remaining expressions unexpectedly shrunk to 0")
         if len(remaining) == 1:
-            # convert to a boolean
-            return Not(Not(remaining[0]))
+            return remaining[0]
         return If(remaining[0]).Then(self._build_ast(remaining[1:])).Else(Int(0))
 
     def __teal__(self, options: "CompileOptions") -> tuple[TealBlock, TealSimpleBlock]:
@@ -64,8 +63,7 @@ class LazyOr(Expr):
         if len(remaining) == 0:
             raise ValueError("list of remaining expressions unexpectedly shrunk to 0")
         if len(remaining) == 1:
-            # convert to a boolean
-            return Not(Not(remaining[0]))
+            return remaining[0]
         return If(remaining[0]).Then(Int(1)).Else(self._assemble(remaining[1:]))
 
     def __teal__(self, options: "CompileOptions") -> tuple[TealBlock, TealSimpleBlock]:
