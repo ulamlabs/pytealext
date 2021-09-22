@@ -2,7 +2,7 @@
 Additional useful operations for Python
 
 ## Available Operations
-- `Muldiv64`: calculate `m1*m2/d` with no overflow on multiplication (TEAL 3+)
+- `MulDiv64`: calculate `m1*m2/d` with no overflow on multiplication (TEAL 3+)
 - `Min`, `Max`: calculate minimum/maximum of 2 expressions, without using slots or evaluating arguments more than once (TEAL 4+)
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation
 
@@ -10,7 +10,7 @@ Additional useful operations for Python
 `GlobalState` and `LocalState` allow for manipulating global and local state respectively.
 They both have the same interface.
 ```python
-from pyteal import App, Bytes, Int
+from pyteal import App, Bytes, Int, Seq, TealType
 from pytealext import LocalState
 
 user_counter = LocalState("UC", TealType.uint64)
@@ -29,6 +29,7 @@ program = Seq(
 ## Example usage
 Example usage for `LazyAnd`:
 ```python
+from pyteal import Gtxn, TxnType, Bytes, Int
 from pytealext import LazyAnd
 
 # Evaluate fields of some transaction but don't panic if an argument down the line would panic
@@ -42,4 +43,5 @@ validation = LazyAnd(
 ## Testing
 `pytest`
 
+-------
 Created by Łukasz Ptak and Paweł Rejkowicz
