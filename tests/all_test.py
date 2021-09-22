@@ -13,6 +13,9 @@ u64_strategy = st.integers(min_value=0, max_value=2 ** 64 - 1)
 # TEAL version to use for testing
 VERSION = 4
 
+def Bool(expr: Expr) -> Expr:
+    return Not(Not(expr))
+
 class MulwDivwTemplate:
     def __init__(self):
         self.m1 = "TMPL_M1"
@@ -84,14 +87,16 @@ def test_mulw_divw_no_bound_check():
 
 
 @given(vals=st.lists(st.integers(min_value=0, max_value=2 ** 64 - 1), min_size=2))
-def test_lazyand_equivalence_with_and(vals: list):
+def test_lazyand_boolean_equivalence_with_and(vals: list):
     """
     Test if LazyAnd and And produce the same outcomes
     """
     ast_lazy_and = calc.LazyAnd(*[Int(val) for val in vals])
     ast_and = And(*[Int(val) for val in vals])
-    note(str(ast_lazy_and))
-    note(compileTeal(ast_lazy_and, Mode.Application, version=VERSION))
+
+    # convert to booleans
+    ast_lazy_and = Bool(ast_lazy_and)
+    ast_and = Bool(ast_and)
 
     stack_lazy, _ = compile_and_run(ast_lazy_and)
     stack_eager, _ = compile_and_run(ast_and)
@@ -108,12 +113,16 @@ def compile_and_run(ast: Expr, mode=Mode.Application, version=VERSION) -> Tuple[
 
 
 @given(vals=st.lists(st.integers(min_value=0, max_value=2 ** 64 - 1).map(Int), min_size=2))
-def test_lazyor_equivalence_with_or(vals: list):
+def test_lazyor_boolean_equivalence_with_or(vals: list):
     """
     Test if LazyOr and Or produce the same outcomes
     """
     ast_lazy_or = calc.LazyOr(*vals)
     ast_or = Or(*vals)
+
+    # convert to booleans
+    ast_lazy_or = Bool(ast_lazy_or)
+    ast_or = Bool(ast_or)
 
     stack_lazy, _ = compile_and_run(ast_lazy_or)
     stack_eager, _ = compile_and_run(ast_or)
