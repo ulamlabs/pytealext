@@ -40,6 +40,9 @@ validation = LazyAnd(
 )
 ```
 
+## Installation
+`pip install pytealext`
+
 ## Testing
 `pytest`
 
