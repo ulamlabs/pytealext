@@ -5,6 +5,8 @@ Additional useful operations for Python
 - `MulDiv64`: calculate `m1*m2/d` with no overflow on multiplication (TEAL 3+)
 - `Min`, `Max`: calculate minimum/maximum of 2 expressions, without using slots or evaluating arguments more than once (TEAL 4+)
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation
+- [Inner Transactions](docs/inner_transactions.md): simplified making of inner transactions
+    - `MakeInnerPaymentTxn`, `MakeInnerAssetTransferTxn` and more!
 
 ### State manipulation
 `GlobalState` and `LocalState` allow for manipulating global and local state respectively.
