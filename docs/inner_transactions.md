@@ -11,7 +11,7 @@ faucet_program = Seq(
     MakeInnerPaymentTxn(
         receiver=Txn.sender(),
         amount=Int(1000),
-        fee=Int(0),
+        fee=Int(2000),
     )
 )
 ```
