@@ -1,18 +1,35 @@
 # Inner transactions
 
 ## Example use
+### Algo faucet
+```python
+from pyteal import *
+from pytealext import MakeInnerPaymentTxn
+
+# smart contract
+faucet_program = Seq(
+    MakeInnerPaymentTxn(
+        receiver=Txn.sender(),
+        amount=Int(1000),
+        fee=Int(0),
+    )
+)
+```
+
+### Opt-in contract to ASA
 ```python
 from pyteal import *
 from pytealext import MakeInnerAssetTransferTxn
 
-asset_id_to_distribute = 12345
+AMAZING_COIN_ID = 123456
 
 # smart contract
 faucet_program = Seq(
     MakeInnerAssetTransferTxn(
-        asset_receiver=Txn.sender(),
-        asset_amount=Int(1000),
-        xfer_asset=Int(0)  # will distribute asset with ID provided in Txn.assets[0]
+        asset_receiver=Global.current_application_address(),
+        asset_amount=Int(0),
+        xfer_asset=Int(AMAZING_COIN_ID),  # Txn.assets must contain this ID!
+        # fee=Int(0),  # uncomment to specify that the fee must be pooled
     )
 )
 ```
@@ -29,14 +46,14 @@ PARASITE_ADDRESS = "SomeAddress..."
 
 @Subroutine(TealType.none)
 def SimpleAssetTransfer(receiver: Expr, amount: Expr):
-    return MakeInnerAssetTransfer(
+    return MakeInnerAssetTransferTxn(
         asset_receiver=receiver,
         asset_amount=amount,
         xfer_asset=Int(ASSET_ID),  # this ID must be present in Txn.assets!
         fee=Int(0),  # The fee must be pooled, we don't want our contract to pay for the inner Txn
     )
 
-# a piece of program which sends the creator 10000 units of an asset but also send a small amount to another address
+# a piece of program which sends the creator 10000 units of an asset but also sends a small amount to another address
 program_piece = Seq(
     Assert(Txn.sender() == Global.creator_address()),
     SimpleAssetTransfer(Txn.sender(), Int(10000)),

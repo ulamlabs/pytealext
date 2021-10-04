@@ -166,7 +166,7 @@ def MakeInnerAssetConfigTxn(
             asset metadata (32 byte hash)
         fee: The fee for the transaction in microAlgos
 
-    Some of the descriptions come from py-algorand-sdk
+    Some of the descriptions come from py-algorand-sdk.
 
     For more details about parameters needed for your use-case visit:
     https://developer.algorand.org/docs/get-details/transactions/transactions/#asset-configuration-transaction
