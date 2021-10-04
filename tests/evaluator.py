@@ -17,14 +17,21 @@ def split128(val: int):
     return val // MAX_INT, val % MAX_INT
 
 
-def eval_teal(lines: list):
+def eval_teal(lines: list, return_stack=True):
     """
-    Simulate a basic teal program
+    Simulate a basic teal program.
+
+    Args:
+        lines: list of TEAL program lines
+        return_stack: whenther "return" opcode shall return the whole stack, not just the value on top
+            This is useful in validating if custom TEAL code produces correct amount of values on stack.
+            Moreover, with pyteal v0.8 every compiled program has a "return" at the end,
+            this would prevent checking contents of the stack once an algorithm finishes executing.
     """
     stack = []
     slots = [0 for _ in range(256)]
     branch_targets = {
-        line[:-1]: nr
+        line[:-1]: nr  # strip trailing ":" from key, ex. b11: -> b11
         for nr, line in enumerate(lines)
         if line[-1] == ":"
     }
@@ -39,9 +46,11 @@ def eval_teal(lines: list):
         if line[-1] == ":":
             continue
 
-        if line == "return":
+        if line == "return":  # ends eval immediately
+            if return_stack:
+                return stack, slots
             return [stack[-1]], slots
-        elif line == "dup":
+        if line == "dup":
             x = stack[-1]
             stack.append(stack[-1])
         elif line == "dup2":
