@@ -228,10 +228,15 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
         elif " " in line:
             op, arg = line.split(" ")
             if op == "byte":
-                if arg[0] != '"' or arg[-1] != '"':
-                    raise Exception("byte expects string literal (this is a very basic evaluator)")
-                arg = arg[1:-1]  # strip quotes
-                stack.append(arg.encode("utf-8"))
+                if arg[0] == '"' or arg[-1] == '"':
+                    arg = arg[1:-1]  # strip quotes
+                    arg = arg.encode("utf-8")
+                elif arg[0:2] == "0x":
+                    arg = arg[2:]
+                    arg = bytes.fromhex(arg)
+                else:
+                    raise Panic("byte requires string or hex value")
+                stack.append(arg)
             elif op == "int":
                 x = int(arg)
                 stack.append(x)
