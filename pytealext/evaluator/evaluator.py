@@ -223,6 +223,8 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             val = stack.pop()
             if not isinstance(val, bytes):
                 raise Panic("btoi requires bytes value")
+            if len(val) > 8:
+                raise Panic("btoi requires bytes of length 8 or less")
             val = int.from_bytes(val, "big")
             stack.append(val)
         elif " " in line:
