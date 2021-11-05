@@ -8,9 +8,10 @@ class Panic(Exception):
     Exception raised when the evaluator encounters an error
     """
 
-    def __init__(self, message):
-        super().__init__(message)
+    def __init__(self, message, line_number):
+        super().__init__(message, f"{line_number=}")
         self.message = message
+        self.line_number = line_number
 
 
 class AssertionFailed(Panic):
@@ -18,8 +19,8 @@ class AssertionFailed(Panic):
     Exception raised when an assertion fails
     """
 
-    def __init__(self):
-        super().__init__("Assert failed")
+    def __init__(self, line_number):
+        super().__init__("Assert failed", line_number)
 
 
 MaxLogCalls = 32
@@ -119,19 +120,19 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
         elif line == "assert":
             val = stack.pop()
             if val == 0:
-                raise AssertionFailed
+                raise AssertionFailed(current_line)
         elif line == "/":
             b = stack.pop()
             a = stack.pop()
             if not b:
-                raise Panic
+                raise Panic("Division by zero", current_line)
             x = a // b
             stack.append(x)
         elif line == "%":
             b = stack.pop()
             a = stack.pop()
             if not b:
-                raise Panic
+                raise Panic("Division by zero", current_line)
             x = a % b
             stack.append(x)
         elif line == "!":
@@ -146,21 +147,21 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             b = stack.pop()
             a = stack.pop()
             if a + b >= INTEGER_SIZE:
-                raise Panic("Overflow")
+                raise Panic("Overflow", current_line)
             x = a + b
             stack.append(x)
         elif line == "-":
             b = stack.pop()
             a = stack.pop()
             if a - b < 0:
-                raise Panic("Underflow")
+                raise Panic("Underflow", current_line)
             x = a - b
             stack.append(x)
         elif line == "*":
             b = stack.pop()
             a = stack.pop()
             if a * b >= INTEGER_SIZE:
-                raise Panic("Overflow")
+                raise Panic("Overflow", current_line)
             x = a * b
             stack.append(x)
         elif line == "&&":
@@ -189,7 +190,7 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             b = stack.pop()
             a = stack.pop()
             if type(a) != type(b):
-                raise Panic("Type mismatch")
+                raise Panic("Type mismatch", current_line)
             stack.append(int(bool(a == b)))
         elif line == "select":
             c = stack.pop()
@@ -219,33 +220,33 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
         elif line == "log":
             val = stack.pop()
             if not isinstance(val, bytes):
-                raise Panic("log requires bytes value")
+                raise Panic("log requires bytes value", current_line)
             if context is None:
                 raise Exception("log requires execution environment context")
             context.log.append(val)
             if sum(len(l) for l in context.log) > MaxLogSize:
-                raise Panic("log size limit exceeded")
+                raise Panic("log size limit exceeded", current_line)
             if len(context.log) > MaxLogCalls:
-                raise Panic("log calls limit exceeded")
+                raise Panic("log calls limit exceeded", current_line)
         elif line == "itob":
             val = stack.pop()
             if not isinstance(val, int):
-                raise Panic("itob requires integer value")
+                raise Panic("itob requires integer value", current_line)
             val = val.to_bytes(8, "big")
             stack.append(val)
         elif line == "btoi":
             val = stack.pop()
             if not isinstance(val, bytes):
-                raise Panic("btoi requires bytes value")
+                raise Panic("btoi requires bytes value", current_line)
             if len(val) > 8:
-                raise Panic("btoi requires bytes of length 8 or less")
+                raise Panic("btoi requires bytes of length 8 or less", current_line)
             val = int.from_bytes(val, "big")
             stack.append(val)
         # provisional support for txna
         elif line.startswith("txna ApplicationArgs"):
             arg_index = int(line.split(" ")[-1])
             if arg_index > len(context.txn.app_args):
-                raise Panic("txna ApplicationArgs index out of bounds")
+                raise Panic("txna ApplicationArgs index out of bounds", current_line)
             stack.append(context.txn.app_args[arg_index])
         elif " " in line:
             op, arg = line.split(" ")
@@ -257,7 +258,7 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
                     arg = arg[2:]
                     arg = bytes.fromhex(arg)
                 else:
-                    raise Panic("byte requires string or hex value")
+                    raise Panic("byte requires string or hex value", current_line)
                 stack.append(arg)
             elif op == "int":
                 x = int(arg)
@@ -276,7 +277,7 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
                 nr = int(arg)  # get the number after the space
                 top = stack.pop()
                 if nr > len(stack):
-                    raise Panic(f"cover {nr} with stack size {len(stack)}")
+                    raise Panic(f"cover {nr} with stack size {len(stack)}", current_line)
                 stack.insert(-nr, top)
             else:
                 if op == "store":

@@ -43,3 +43,23 @@ def test_log():
 
     assert stack == [1]
     assert ctx.log == [b"wubwub", b"numbertwo"]
+
+def test_equals():
+    expr_ok = Int(10) == Int(10)
+    expr_bad = Int(10) == Int(11)
+    expr_ok_b = Bytes(b"wub") == Bytes(b"wub")
+    expr_bad_b = Bytes(b"wub") == Bytes(b"wubwub")
+
+    expr_ok_asm = compileTeal(expr_ok, Mode.Application, version=VERSION)
+    expr_bad_asm = compileTeal(expr_bad, Mode.Application, version=VERSION)
+    expr_ok_b_asm = compileTeal(expr_ok_b, Mode.Application, version=VERSION)
+    expr_bad_b_asm = compileTeal(expr_bad_b, Mode.Application, version=VERSION)
+
+    stack, _ = eval_teal(expr_ok_asm.splitlines())
+    assert stack == [1]
+    stack, _ = eval_teal(expr_bad_asm.splitlines())
+    assert stack == [0]
+    stack, _ = eval_teal(expr_ok_b_asm.splitlines())
+    assert stack == [1]
+    stack, _ = eval_teal(expr_bad_b_asm.splitlines())
+    assert stack == [0]
