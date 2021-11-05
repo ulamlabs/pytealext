@@ -20,6 +20,14 @@ class AssertionFailed(Panic):
         super().__init__("Assert failed")
 
 
+class EvalContext:
+    """
+    Class containing the execution environment for an application call
+    """
+    def __init__(self, global_state: dict or None = None):
+        self.global_state = global_state if global_state is not None else {}  # type: dict[str, int or str]
+
+
 def split128(val: int):
     """
     Splits a 128-bit integer into a tuple (x, y) of 64-bit integers
@@ -28,7 +36,7 @@ def split128(val: int):
     return val // MAX_INT, val % MAX_INT
 
 
-def eval_teal(lines: list[str], return_stack=True):
+def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None = None) -> tuple[list, list]:
     """
     Simulate a basic teal program.
 
@@ -38,6 +46,10 @@ def eval_teal(lines: list[str], return_stack=True):
             This is useful in validating if custom TEAL code produces correct amount of values on stack.
             Moreover, with pyteal v0.8 every compiled program has a "return" at the end,
             this would prevent checking contents of the stack once an algorithm finishes executing.
+        context: execution context for the program (this will be updated, should state modification occour)
+    
+    Returns:
+        tuple of (stack, slots)
     """
     stack = []
     slots = [0 for _ in range(256)]
@@ -178,6 +190,18 @@ def eval_teal(lines: list[str], return_stack=True):
             if nr > len(stack):
                 raise Panic(f"cover {nr} with stack size {len(stack)}")
             stack.insert(-nr, top)
+        elif line == "app_global_get":
+            key = stack.pop()
+            if context is None:
+                raise Exception("app_global_get requires execution environment context")
+            val = context.global_state.get(key, 0)
+            stack.append(val)
+        elif line == "app_global_put":
+            b = stack.pop()
+            a = stack.pop()
+            if context is None:
+                raise Exception("app_global_put requires execution environment context")
+            context.global_state[a] = b
         elif " " in line:
             op, arg = line.split(" ")
             if op == "int":

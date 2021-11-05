@@ -5,8 +5,7 @@ from hypothesis import strategies as st
 from pyteal import And, Expr, Int, Mode, Not, Or, compileTeal
 
 from pytealext import LazyAnd, LazyOr, Max, Min
-
-from .evaluator import eval_teal
+from pytealext.evaluator import eval_teal
 
 u64_strategy = st.integers(min_value=0, max_value=2 ** 64 - 1)
 # TEAL version to use for testing

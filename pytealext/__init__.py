@@ -1,3 +1,4 @@
+from . import evaluator
 from .assemble import assemble_step, assemble_steps
 from .cas import CompareAndSelect, Max, Min
 from .inner_transactions import (
@@ -14,6 +15,7 @@ from .state import GlobalState, LocalState, get_global_state_ex
 __all__ = [
     "assemble_step",
     "assemble_steps",
+    "evaluator",
     "CompareAndSelect",
     "MakeInnerTxn",
     "MakeInnerPaymentTxn",

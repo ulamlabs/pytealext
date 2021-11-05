@@ -4,9 +4,8 @@ from hypothesis import strategies as st
 from pyteal import Expr, Int, Mode, Not, compileTeal
 from pyteal.ast.tmpl import Tmpl
 
-import pytealext as calc
-
-from .evaluator import MAX_INT, AssertionFailed, eval_teal
+from pytealext import MulDiv64
+from pytealext.evaluator import eval_teal, AssertionFailed, MAX_INT
 
 u64_strategy = st.integers(min_value=0, max_value=2 ** 64 - 1)
 # TEAL version to use for testing
@@ -22,7 +21,7 @@ class MulwDivwTemplate:
         self.m1 = "TMPL_M1"
         self.m2 = "TMPL_M2"
         self.d = "TMPL_D"
-        expr = calc.MulDiv64(Tmpl.Int(self.m1), Tmpl.Int(self.m2), Tmpl.Int(self.d))
+        expr = MulDiv64(Tmpl.Int(self.m1), Tmpl.Int(self.m2), Tmpl.Int(self.d))
         self.code = compileTeal(expr, Mode.Application, version=VERSION)
 
     def get_lines(self, m1, m2, d):
@@ -54,9 +53,9 @@ def test_mulw_divw_extra(m1, m2, d):
 
 @pytest.mark.parametrize("bound_check", [True, False])
 def test_mulw_divw_stacked(bound_check):
-    expr = calc.MulDiv64(
-        calc.MulDiv64(Int(123456789), Int(987654321), Int(23456789), bound_check),
-        calc.MulDiv64(Int(2137), Int(1337), Int(1000), bound_check),
+    expr = MulDiv64(
+        MulDiv64(Int(123456789), Int(987654321), Int(23456789), bound_check),
+        MulDiv64(Int(2137), Int(1337), Int(1000), bound_check),
         Int(2000),
         bound_check,
     )
@@ -79,7 +78,7 @@ def test_mulw_divw_no_bound_check():
     m1 = 2 ** 64 - 1
     m2 = 2 ** 64 - 1
     d = 2 ** 63 + 1
-    expr = calc.MulDiv64(Int(m1), Int(m2), Int(d), check_bounds=False)
+    expr = MulDiv64(Int(m1), Int(m2), Int(d), check_bounds=False)
     expected = m1 * m2 // d % MAX_INT
 
     code = compileTeal(expr, Mode.Application, version=VERSION)
@@ -89,7 +88,7 @@ def test_mulw_divw_no_bound_check():
     assert actual == expected
 
 
-muldiv_ceil_template = calc.MulDiv64(Tmpl.Int("TMPL_M1"), Tmpl.Int("TMPL_M2"), Tmpl.Int("TMPL_D"), ceiling=True)
+muldiv_ceil_template = MulDiv64(Tmpl.Int("TMPL_M1"), Tmpl.Int("TMPL_M2"), Tmpl.Int("TMPL_D"), ceiling=True)
 compiled_ceil_template = compileTeal(muldiv_ceil_template, Mode.Application, version=VERSION)
 
 
