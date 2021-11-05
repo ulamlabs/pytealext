@@ -1,4 +1,4 @@
-MAX_INT = 2 ** 64
+INTEGER_SIZE = 2 ** 64
 
 
 class Panic(Exception):
@@ -24,6 +24,7 @@ class EvalContext:
     """
     Class containing the execution environment for an application call
     """
+
     def __init__(self, global_state: dict or None = None):
         self.global_state = global_state if global_state is not None else {}  # type: dict[str, int or str]
 
@@ -33,7 +34,7 @@ def split128(val: int):
     Splits a 128-bit integer into a tuple (x, y) of 64-bit integers
     where x are the higher 64 bits and y are the lower 64 bits
     """
-    return val // MAX_INT, val % MAX_INT
+    return val // INTEGER_SIZE, val % INTEGER_SIZE
 
 
 def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None = None) -> tuple[list, list]:
@@ -47,7 +48,7 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             Moreover, with pyteal v0.8 every compiled program has a "return" at the end,
             this would prevent checking contents of the stack once an algorithm finishes executing.
         context: execution context for the program (this will be updated, should state modification occour)
-    
+
     Returns:
         tuple of (stack, slots)
     """
@@ -96,8 +97,8 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             divisor_hi = stack.pop()
             dividend_lo = stack.pop()
             dividend_hi = stack.pop()
-            divisor = divisor_lo + divisor_hi * MAX_INT
-            dividend = dividend_lo + dividend_hi * MAX_INT
+            divisor = divisor_lo + divisor_hi * INTEGER_SIZE
+            dividend = dividend_lo + dividend_hi * INTEGER_SIZE
             quotient = dividend // divisor
             reminder = dividend % divisor
             stack.extend(split128(quotient))
@@ -126,12 +127,12 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             stack.append(x)
         elif line == "~":
             a = stack.pop()
-            x = (MAX_INT - 1) ^ a
+            x = (INTEGER_SIZE - 1) ^ a
             stack.append(x)
         elif line == "+":
             b = stack.pop()
             a = stack.pop()
-            if a + b >= MAX_INT:
+            if a + b >= INTEGER_SIZE:
                 raise Panic("Overflow")
             x = a + b
             stack.append(x)
@@ -145,7 +146,7 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
         elif line == "*":
             b = stack.pop()
             a = stack.pop()
-            if a * b >= MAX_INT:
+            if a * b >= INTEGER_SIZE:
                 raise Panic("Overflow")
             x = a * b
             stack.append(x)

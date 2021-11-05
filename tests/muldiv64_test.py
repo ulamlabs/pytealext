@@ -5,7 +5,7 @@ from pyteal import Expr, Int, Mode, Not, compileTeal
 from pyteal.ast.tmpl import Tmpl
 
 from pytealext import MulDiv64
-from pytealext.evaluator import eval_teal, AssertionFailed, MAX_INT
+from pytealext.evaluator import eval_teal, AssertionFailed, INTEGER_SIZE
 
 u64_strategy = st.integers(min_value=0, max_value=2 ** 64 - 1)
 # TEAL version to use for testing
@@ -79,7 +79,7 @@ def test_mulw_divw_no_bound_check():
     m2 = 2 ** 64 - 1
     d = 2 ** 63 + 1
     expr = MulDiv64(Int(m1), Int(m2), Int(d), check_bounds=False)
-    expected = m1 * m2 // d % MAX_INT
+    expected = m1 * m2 // d % INTEGER_SIZE
 
     code = compileTeal(expr, Mode.Application, version=VERSION)
     stack, _ = eval_teal(code.splitlines())
@@ -103,7 +103,7 @@ def test_muldiv64_ceiling(m1: int, m2: int, d: int):
     expected = m1 * m2 // d
     if m1 * m2 % d != 0:
         expected += 1
-    assume(expected < MAX_INT)
+    assume(expected < INTEGER_SIZE)
     code = compiled_ceil_template.replace("TMPL_M1", str(m1)).replace("TMPL_M2", str(m2)).replace("TMPL_D", str(d))
     stack, _ = eval_teal(code.splitlines())
 
