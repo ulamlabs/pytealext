@@ -2,11 +2,21 @@ MAX_INT = 2 ** 64
 
 
 class Panic(Exception):
-    pass
+    """
+    Exception raised when the evaluator encounters an error
+    """
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
 
 
 class AssertionFailed(Panic):
-    pass
+    """
+    Exception raised when an assertion fails
+    """
+    def __init__(self):
+        super().__init__("Assert failed")
 
 
 def split128(val: int):
@@ -17,7 +27,7 @@ def split128(val: int):
     return val // MAX_INT, val % MAX_INT
 
 
-def eval_teal(lines: list, return_stack=True):
+def eval_teal(lines: list[str], return_stack=True):
     """
     Simulate a basic teal program.
 
@@ -109,14 +119,21 @@ def eval_teal(lines: list, return_stack=True):
             b = stack.pop()
             a = stack.pop()
             if a + b >= MAX_INT:
-                raise Panic
+                raise Panic("Overflow")
             x = a + b
+            stack.append(x)
+        elif line == "-":
+            b = stack.pop()
+            a = stack.pop()
+            if a - b < 0:
+                raise Panic("Underflow")
+            x = a - b
             stack.append(x)
         elif line == "*":
             b = stack.pop()
             a = stack.pop()
             if a * b >= MAX_INT:
-                raise Panic
+                raise Panic("Overflow")
             x = a * b
             stack.append(x)
         elif line == "&&":
@@ -154,6 +171,12 @@ def eval_teal(lines: list, return_stack=True):
             a = stack.pop()
             stack.append(b)
             stack.append(a)
+        elif line.startswith("cover"):
+            nr = int(line[6:])  # get the number after the space
+            top = stack.pop()
+            if nr > len(stack):
+                raise Panic(f"cover {nr} with stack size {len(stack)}")
+            stack.insert(-nr, top)
         elif " " in line:
             op, arg = line.split(" ")
             if op == "int":
