@@ -20,13 +20,18 @@ class AssertionFailed(Panic):
         super().__init__("Assert failed")
 
 
+MaxLogCalls = 32
+MaxLogSize = 1024
+
+
 class EvalContext:
     """
     Class containing the execution environment for an application call
     """
 
-    def __init__(self, global_state: dict or None = None):
-        self.global_state = global_state if global_state is not None else {}  # type: dict[str, int or str]
+    def __init__(self, global_state: dict[bytes, bytes or int] or None = None):
+        self.global_state = global_state if global_state is not None else {}  # type: dict[bytes, int or bytes]
+        self.log = []  # type: list[bytes]
 
 
 def split128(val: int):
@@ -52,7 +57,7 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
     Returns:
         tuple of (stack, slots)
     """
-    stack = []
+    stack = []  # type: list[int or str]
     slots = [0 for _ in range(256)]
     branch_targets = {
         line[:-1]: nr  # strip trailing ":" from key, ex. b11: -> b11
@@ -185,12 +190,6 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             a = stack.pop()
             stack.append(b)
             stack.append(a)
-        elif line.startswith("cover"):
-            nr = int(line[6:])  # get the number after the space
-            top = stack.pop()
-            if nr > len(stack):
-                raise Panic(f"cover {nr} with stack size {len(stack)}")
-            stack.insert(-nr, top)
         elif line == "app_global_get":
             key = stack.pop()
             if context is None:
@@ -203,9 +202,37 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             if context is None:
                 raise Exception("app_global_put requires execution environment context")
             context.global_state[a] = b
+        elif line == "log":
+            val = stack.pop()
+            if not isinstance(val, bytes):
+                raise Panic("log requires bytes value")
+            if context is None:
+                raise Exception("log requires execution environment context")
+            context.log.append(val)
+            if sum(len(l) for l in context.log) > MaxLogSize:
+                raise Panic("log size limit exceeded")
+            if len(context.log) > MaxLogCalls:
+                raise Panic("log calls limit exceeded")
+        elif line == "itob":
+            val = stack.pop()
+            if not isinstance(val, int):
+                raise Panic("itob requires integer value")
+            val = val.to_bytes(8, "big")
+            stack.append(val)
+        elif line == "btoi":
+            val = stack.pop()
+            if not isinstance(val, bytes):
+                raise Panic("btoi requires bytes value")
+            val = int.from_bytes(val, "big")
+            stack.append(val)
         elif " " in line:
             op, arg = line.split(" ")
-            if op == "int":
+            if op == "byte":
+                if arg[0] != '"' or arg[-1] != '"':
+                    raise Exception("byte expects string literal (this is a very basic evaluator)")
+                arg = arg[1:-1]  # strip quotes
+                stack.append(arg.encode("utf-8"))
+            elif op == "int":
                 x = int(arg)
                 stack.append(x)
             elif op == "bnz":
@@ -218,6 +245,12 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
                     current_line = branch_targets[arg]
             elif op == "b":
                 current_line = branch_targets[arg]
+            elif op == "cover":
+                nr = int(arg)  # get the number after the space
+                top = stack.pop()
+                if nr > len(stack):
+                    raise Panic(f"cover {nr} with stack size {len(stack)}")
+                stack.insert(-nr, top)
             else:
                 if op == "store":
                     i = int(arg)
