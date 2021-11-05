@@ -1,5 +1,5 @@
-from pyteal import Expr, If, Int, Not, TealBlock, TealSimpleBlock, TealInputError
-from pyteal.types import require_type, TealType
+from pyteal import CompileOptions, Expr, If, Int, TealBlock, TealInputError, TealSimpleBlock
+from pyteal.types import TealType, require_type
 
 
 class LazyAnd(Expr):
@@ -32,7 +32,7 @@ class LazyAnd(Expr):
             return remaining[0]
         return If(remaining[0]).Then(self._build_ast(remaining[1:])).Else(Int(0))
 
-    def __teal__(self, options: "CompileOptions") -> tuple[TealBlock, TealSimpleBlock]:
+    def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
         return self._build_ast(self.args).__teal__(options)
 
 
@@ -66,5 +66,5 @@ class LazyOr(Expr):
             return remaining[0]
         return If(remaining[0]).Then(Int(1)).Else(self._assemble(remaining[1:]))
 
-    def __teal__(self, options: "CompileOptions") -> tuple[TealBlock, TealSimpleBlock]:
+    def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
         return self._assemble(self.args).__teal__(options)

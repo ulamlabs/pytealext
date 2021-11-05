@@ -1,11 +1,11 @@
 from .assemble import assemble_step, assemble_steps
 from .cas import CompareAndSelect, Max, Min
 from .inner_transactions import (
-    MakeInnerTxn,
-    MakeInnerPaymentTxn,
-    MakeInnerAssetTransferTxn,
+    MakeInnerAssetConfigTxn,
     MakeInnerAssetFreezeTxn,
-    MakeInnerAssetConfigTxn
+    MakeInnerAssetTransferTxn,
+    MakeInnerPaymentTxn,
+    MakeInnerTxn,
 )
 from .lazy import LazyAnd, LazyOr
 from .muldiv64 import MulDiv64

@@ -1,5 +1,6 @@
 from typing import Union
-from pyteal import App, MaybeValue, Int, Bytes, Expr, TealType
+
+from pyteal import App, Bytes, Expr, Int, MaybeValue, TealType
 from pyteal.types import require_type
 
 

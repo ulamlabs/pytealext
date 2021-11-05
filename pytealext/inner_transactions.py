@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pyteal import Expr, InnerTxnBuilder, Seq, TxnType, TxnField
+from pyteal import Expr, InnerTxnBuilder, Seq, TxnField, TxnType
 
 
 def MakeInnerTxn(**kwargs: Optional[Expr]) -> Expr:
@@ -39,7 +39,7 @@ def MakeInnerTxn(**kwargs: Optional[Expr]) -> Expr:
         # black: dont-compact-seq
         InnerTxnBuilder.Begin(),
         InnerTxnBuilder.SetFields(fields_to_exprs),
-        InnerTxnBuilder.Submit()
+        InnerTxnBuilder.Submit(),
     )
 
 

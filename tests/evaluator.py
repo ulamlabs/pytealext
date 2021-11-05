@@ -15,6 +15,7 @@ class AssertionFailed(Panic):
     """
     Exception raised when an assertion fails
     """
+
     def __init__(self):
         super().__init__("Assert failed")
 

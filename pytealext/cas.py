@@ -1,7 +1,7 @@
 from typing import Iterator
 
-from pyteal import Expr, Op, TealBlock, TealSimpleBlock
-from pyteal.types import require_type, TealType
+from pyteal import CompileOptions, Expr, Op, TealBlock, TealSimpleBlock
+from pyteal.types import TealType, require_type
 
 from .assemble import assemble_steps
 
@@ -45,7 +45,7 @@ class CompareAndSelect(Expr):
         yield (self.op,)
         yield (Op.select,)
 
-    def __teal__(self, options: "CompileOptions") -> tuple[TealBlock, TealSimpleBlock]:
+    def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
         return assemble_steps(self._get_steps(), options, expr=self)
 
 

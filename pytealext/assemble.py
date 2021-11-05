@@ -1,6 +1,6 @@
 from typing import Iterable, Union
 
-from pyteal import Expr, Op, TealBlock, TealSimpleBlock, TealOp, CompileOptions
+from pyteal import CompileOptions, Expr, Op, TealBlock, TealOp, TealSimpleBlock
 
 
 def assemble_step(options: CompileOptions, op: Union[Op, Expr], *args, expr: Expr = None):
@@ -33,6 +33,7 @@ def assemble_steps(steps: Iterable[tuple], options: CompileOptions, expr=None) -
             end = argEnd
 
     return start, end
+
 
 def new_assembler(steps: Iterable[TealOp or Expr], options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
     """
