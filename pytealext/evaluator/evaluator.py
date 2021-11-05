@@ -1,3 +1,5 @@
+from algosdk.future.transaction import ApplicationCallTxn
+
 INTEGER_SIZE = 2 ** 64
 
 
@@ -29,8 +31,14 @@ class EvalContext:
     Class containing the execution environment for an application call
     """
 
-    def __init__(self, global_state: dict[bytes, bytes or int] or None = None):
+    def __init__(self, global_state: dict[bytes, bytes or int] or None = None, txn: ApplicationCallTxn or None = None):
+        """
+        Args:
+            global_state: The global state of the application
+            txn: The transaction that is being evaluated
+        """
         self.global_state = global_state if global_state is not None else {}  # type: dict[bytes, int or bytes]
+        self.txn = txn
         self.log = []  # type: list[bytes]
 
 
@@ -227,6 +235,12 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
                 raise Panic("btoi requires bytes of length 8 or less")
             val = int.from_bytes(val, "big")
             stack.append(val)
+        # provisional support for txna
+        elif line.startswith("txna ApplicationArgs"):
+            arg_index = int(line.split(" ")[-1])
+            if arg_index > len(context.txn.app_args):
+                raise Panic("txna ApplicationArgs index out of bounds")
+            stack.append(context.txn.app_args[arg_index])
         elif " " in line:
             op, arg = line.split(" ")
             if op == "byte":
