@@ -185,6 +185,12 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             b = stack.pop()
             a = stack.pop()
             stack.append(int(bool(a < b)))
+        elif line == "==":
+            b = stack.pop()
+            a = stack.pop()
+            if type(a) != type(b):
+                raise Panic("Type mismatch")
+            stack.append(int(bool(a == b)))
         elif line == "select":
             c = stack.pop()
             b = stack.pop()
