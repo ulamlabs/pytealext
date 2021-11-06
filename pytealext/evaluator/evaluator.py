@@ -1,3 +1,4 @@
+from typing import IO
 from algosdk.future.transaction import ApplicationCallTxn
 
 INTEGER_SIZE = 2 ** 64
@@ -51,7 +52,9 @@ def split128(val: int):
     return val // INTEGER_SIZE, val % INTEGER_SIZE
 
 
-def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None = None) -> tuple[list, list]:
+def eval_teal(
+    lines: list[str], return_stack=True, context: EvalContext or None = None, debug: IO or None = None
+) -> tuple[list, list]:
     """
     Simulate a basic teal program.
 
@@ -62,6 +65,8 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
             Moreover, with pyteal v0.8 every compiled program has a "return" at the end,
             this would prevent checking contents of the stack once an algorithm finishes executing.
         context: execution context for the program (this will be updated, should state modification occour)
+        debug: descriptor to write to after each program step. Current line as well as
+            stack contents before the operation are reported.
 
     Returns:
         tuple of (stack, slots)
@@ -78,6 +83,9 @@ def eval_teal(lines: list[str], return_stack=True, context: EvalContext or None 
     while current_line < len(lines):
         line = lines[current_line]
         current_line += 1
+
+        if debug:
+            print(f"{current_line}: {line} | {stack}", file=debug)
 
         if line.startswith("#"):
             continue
