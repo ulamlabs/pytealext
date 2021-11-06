@@ -51,15 +51,21 @@ def test_mulw_divw_extra(m1, m2, d):
     mulw_divw_template.check(m1, m2, d)
 
 
-@pytest.mark.parametrize("bound_check", [True, False])
-def test_mulw_divw_stacked(bound_check):
+@pytest.mark.parametrize("ceiling", [True, False])
+def test_mulw_divw_stacked(ceiling):
     expr = MulDiv64(
-        MulDiv64(Int(123456789), Int(987654321), Int(23456789), bound_check),
-        MulDiv64(Int(2137), Int(1337), Int(1000), bound_check),
+        MulDiv64(Int(123456789), Int(987654321), Int(23456789), ceiling),
+        MulDiv64(Int(2137), Int(1337), Int(1000), ceiling),
         Int(2000),
-        bound_check,
+        ceiling,
     )
     expected = (123456789 * 987654321 // 23456789) * (2137 * 1337 // 1000) // 2000
+    if ceiling:
+        # calculate ceiling with property floor((x+y-1)/y) == ceil(x/y)
+        r1 = (123456789 * 987654321 + 23456789 - 1) // 23456789
+        r2 = (2137 * 1337 + 1000 - 1) // 1000
+        d = 2000
+        expected = (r1 * r2 + d - 1) // d
     code = compileTeal(expr, Mode.Application, version=VERSION)
     stack, _ = eval_teal(code.splitlines())
     assert len(stack) == 1
@@ -72,20 +78,6 @@ def test_mulw_divw_bound_check():
         mulw_divw_template.check(2 ** 63, 2, 1)
     with pytest.raises(AssertionFailed):
         mulw_divw_template.check(2 ** 63, 2 ** 63, 2 ** 60)
-
-
-def test_mulw_divw_no_bound_check():
-    m1 = 2 ** 64 - 1
-    m2 = 2 ** 64 - 1
-    d = 2 ** 63 + 1
-    expr = MulDiv64(Int(m1), Int(m2), Int(d), check_bounds=False)
-    expected = m1 * m2 // d % INTEGER_SIZE
-
-    code = compileTeal(expr, Mode.Application, version=VERSION)
-    stack, _ = eval_teal(code.splitlines())
-    assert len(stack) == 1
-    actual = stack[0]
-    assert actual == expected
 
 
 muldiv_ceil_template = MulDiv64(Tmpl.Int("TMPL_M1"), Tmpl.Int("TMPL_M2"), Tmpl.Int("TMPL_D"), ceiling=True)

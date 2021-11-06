@@ -11,15 +11,13 @@ class MulDiv64(Expr):
     """
     MulDiv64 calculates the expression m1 * m2 / d rounded down unless explicitly asked for the ceiling.
     The result of this operation is a 64 bit integer (the lower 64 bits of the 128 bit result).
-    By default, the bounds of the result are checked, and should it exceed the 64 bit integer capacity,
+    The bounds of the result are checked, and should it exceed the 64 bit integer capacity,
     the runtime will fail.
     """
 
-    def __init__(self, m1: Expr, m2: Expr, d: Expr, check_bounds: bool = True, ceiling: bool = False):
+    def __init__(self, m1: Expr, m2: Expr, d: Expr, ceiling: bool = False):
         """
         Args:
-            check_bounds: make an assertion that the result fits in a 64-bit integer
-                if set to False, lower 64 bits of the result are returned
             ceiling: Calculate the ceiling of (m1*m2)/d instead of the floor
         """
         super().__init__()
@@ -30,43 +28,33 @@ class MulDiv64(Expr):
         self.m1 = m1
         self.m2 = m2
         self.d = d
-        self.check_bounds = check_bounds
         self.ceiling = ceiling
 
     def _get_steps(self) -> Iterator[Expr or TealOp]:
         yield self.m1
         yield self.m2
         yield TealOp(self, Op.mulw)
-        if self.ceiling:
-            # perform the ceiling operation by property: ⌈x/y⌉ = ⌊(x+y-1)/y⌋
-            # in this case it transaltes to: ⌈(m1*m2)/d⌉ = ⌊(m1*m2+d-1)/d⌋
-            # the stack is: ..., mul_hi, mul_lo
-            # below we emulate 128 bit addition of the result of multiplication and d-1
-            yield self.d
-            yield Int(1)
-            yield TealOp(self, Op.minus)
-            # the stack is: ..., mul_hi, mul_lo, (d-1)
-            yield TealOp(self, Op.addw)
-            # the stack is: ..., mul_hi, add_hi, add_lo
-            # to get the expected result high bits need to be added
-            yield TealOp(self, Op.cover, 2)
-            # the stack is: ..., add_lo, mul_hi, add_hi
-            # add the high results and swap to return the high bits where they belong
-            yield TealOp(self, Op.add)
-            yield TealOp(self, Op.swap)
         yield Int(0)  # higher 64 bits of the divisor
         yield self.d  # lower 64 bits of the divisor
         yield TealOp(self, Op.divmodw)
-        # pop 128b remainder
-        yield TealOp(self, Op.pop)
-        yield TealOp(self, Op.pop)
-        # store the lower 64 bits
-        yield TealOp(self, Op.swap)
-        if self.check_bounds:
-            yield TealOp(self, Op.logic_not)
-            yield TealOp(self, Op.assert_)
+        # stack is: ..., div_hi, div_lo, mod_hi, mod_lo
+        if self.ceiling:
+            # should the result of the operation have a remainder, we add 1 to the result
+            # we do this by calculating the logical or of the remainder which produces a result in range [0,1]
+            yield TealOp(self, Op.logic_or)
+            # the stack is: ..., div_hi, div_lo, (mod_hi || mod_lo)
+            # if the addition overflows, the runtime will panic
+            yield TealOp(self, Op.add)
+            # the stack is: ..., div_hi, (div_lo + round_up_bit)
         else:
+            # pop 128b remainder
             yield TealOp(self, Op.pop)
+            yield TealOp(self, Op.pop)
+        # put the higher 64 bits of the result on top of the stack
+        yield TealOp(self, Op.swap)
+        # check if the result overflew the 64 bit integer capacity
+        yield TealOp(self, Op.logic_not)
+        yield TealOp(self, Op.assert_)
 
     def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
         return new_assembler(self._get_steps(), options)

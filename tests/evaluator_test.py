@@ -44,6 +44,7 @@ def test_log():
     assert stack == [1]
     assert ctx.log == [b"wubwub", b"numbertwo"]
 
+
 def test_equals():
     expr_ok = Int(10) == Int(10)
     expr_bad = Int(10) == Int(11)
