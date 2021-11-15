@@ -1,9 +1,9 @@
 from hypothesis import given
 from hypothesis import strategies as st
 from pyteal import Btoi, Bytes, Int, Itob, Log, Mode, Pop, Seq, compileTeal
+import pytest
 
-from pytealext.evaluator import eval_teal
-from pytealext.evaluator.evaluator import EvalContext
+from pytealext.evaluator import eval_teal, EvalContext, Panic
 
 VERSION = 5
 
@@ -64,3 +64,24 @@ def test_equals():
     assert stack == [1]
     stack, _ = eval_teal(expr_bad_b_asm.splitlines())
     assert stack == [0]
+
+def test_math_ops_fail_with_byte_type():
+    ops = [
+        "addw", "mulw", "/", "%", "+", "-", "*", "&&", "||", ">", "<"
+    ]
+    bad_programs = [
+        ["byte 0x01", "byte 0x02"],
+        ["byte 0x03", "int 4"],
+        ["int 5", "byte 0x06"]
+    ]
+    for op in ops:
+        for bad_program in bad_programs:
+            bp = bad_program + [op]
+            with pytest.raises(Panic, match="Invalid type"):
+                eval_teal(bp)
+
+def test_int_out_of_range_int_fails():
+    programs = [[f"int {2**64}"], ["int -1"]]
+    for program in programs:
+        with pytest.raises(Panic):
+            eval_teal(program)

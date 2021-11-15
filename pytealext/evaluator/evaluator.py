@@ -1,4 +1,5 @@
 from typing import IO
+
 from algosdk.future.transaction import ApplicationCallTxn
 
 INTEGER_SIZE = 2 ** 64
@@ -107,11 +108,15 @@ def eval_teal(
         elif line == "mulw":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             ab = a * b
             stack.extend(split128(ab))
         elif line == "addw":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             ab = a + b
             stack.extend(split128(ab))
         elif line == "divmodw":
@@ -119,19 +124,30 @@ def eval_teal(
             divisor_hi = stack.pop()
             dividend_lo = stack.pop()
             dividend_hi = stack.pop()
+            if (
+                not isinstance(divisor_lo, int)
+                or not isinstance(divisor_hi, int)
+                or not isinstance(dividend_lo, int)
+                or not isinstance(dividend_hi, int)
+            ):
+                raise Panic("Invalid type", current_line)
             divisor = divisor_lo + divisor_hi * INTEGER_SIZE
             dividend = dividend_lo + dividend_hi * INTEGER_SIZE
             quotient = dividend // divisor
-            reminder = dividend % divisor
+            remainder = dividend % divisor
             stack.extend(split128(quotient))
-            stack.extend(split128(reminder))
+            stack.extend(split128(remainder))
         elif line == "assert":
-            val = stack.pop()
-            if val == 0:
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("Invalid type", current_line)
+            if a == 0:
                 raise AssertionFailed(current_line)
         elif line == "/":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if not b:
                 raise Panic("Division by zero", current_line)
             x = a // b
@@ -139,21 +155,29 @@ def eval_teal(
         elif line == "%":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if not b:
                 raise Panic("Division by zero", current_line)
             x = a % b
             stack.append(x)
         elif line == "!":
             a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("Invalid type", current_line)
             x = int(not a)
             stack.append(x)
         elif line == "~":
             a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("Invalid type", current_line)
             x = (INTEGER_SIZE - 1) ^ a
             stack.append(x)
         elif line == "+":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if a + b >= INTEGER_SIZE:
                 raise Panic("Overflow", current_line)
             x = a + b
@@ -161,6 +185,8 @@ def eval_teal(
         elif line == "-":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if a - b < 0:
                 raise Panic("Underflow", current_line)
             x = a - b
@@ -168,6 +194,8 @@ def eval_teal(
         elif line == "*":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if a * b >= INTEGER_SIZE:
                 raise Panic("Overflow", current_line)
             x = a * b
@@ -175,6 +203,8 @@ def eval_teal(
         elif line == "&&":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if a and b:
                 stack.append(1)
             else:
@@ -182,6 +212,8 @@ def eval_teal(
         elif line == "||":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             if a or b:
                 stack.append(1)
             else:
@@ -189,21 +221,33 @@ def eval_teal(
         elif line == ">":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             stack.append(int(bool(a > b)))
         elif line == "<":
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
             stack.append(int(bool(a < b)))
         elif line == "==":
             b = stack.pop()
             a = stack.pop()
-            if type(a) != type(b):
+            if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             stack.append(int(bool(a == b)))
+        elif line == "!=":
+            b = stack.pop()
+            a = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            stack.append(int(bool(a != b)))
         elif line == "select":
             c = stack.pop()
             b = stack.pop()
             a = stack.pop()
+            if not isinstance(c, int):
+                raise Panic("Invalid types", current_line)
             if c != 0:
                 stack.append(b)
             else:
@@ -270,6 +314,10 @@ def eval_teal(
                 stack.append(arg)
             elif op == "int":
                 x = int(arg)
+                if x < 0 or x >= INTEGER_SIZE:
+                    raise Panic(
+                        f"int expects non-negative integer smaller than {INTEGER_SIZE} (actual={x})", current_line
+                    )
                 stack.append(x)
             elif op == "bnz":
                 cond = stack.pop()
