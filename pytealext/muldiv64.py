@@ -4,7 +4,7 @@ from pyteal import CompileOptions, Expr, Int, Op, TealBlock, TealSimpleBlock
 from pyteal.ir.tealop import TealOp
 from pyteal.types import TealType, require_type
 
-from .assemble import new_assembler
+from .assemble import assemble_steps
 
 
 class MulDiv64(Expr):
@@ -57,7 +57,7 @@ class MulDiv64(Expr):
         yield TealOp(self, Op.assert_)
 
     def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
-        return new_assembler(self._get_steps(), options)
+        return assemble_steps(self._get_steps(), options)
 
     def __str__(self):
         return "(MulDiv64 {} {} {})".format(self.m1, self.m2, self.d)

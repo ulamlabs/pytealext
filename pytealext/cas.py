@@ -1,6 +1,7 @@
 from typing import Iterator
 
 from pyteal import CompileOptions, Expr, Op, TealBlock, TealSimpleBlock
+from pyteal.ir.tealop import TealOp
 from pyteal.types import TealType, require_type
 
 from .assemble import assemble_steps
@@ -35,18 +36,18 @@ class CompareAndSelect(Expr):
             type_name = f"CompareAndSelect({str(self.op)})"
         return f"({type_name} {str(self.lhs)} {str(self.rhs)})"
 
-    def _get_steps(self) -> Iterator[tuple]:
+    def _get_steps(self) -> Iterator[TealOp or Expr]:
         """
         Steps of the program described in TEAL
         """
-        yield (self.lhs,)
-        yield (self.rhs,)
-        yield (Op.dup2,)
-        yield (self.op,)
-        yield (Op.select,)
+        yield self.lhs
+        yield self.rhs
+        yield TealOp(self, Op.dup2)
+        yield TealOp(self, self.op)
+        yield TealOp(self, Op.select)
 
     def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
-        return assemble_steps(self._get_steps(), options, expr=self)
+        return assemble_steps(self._get_steps(), options)
 
 
 class Min(CompareAndSelect):
