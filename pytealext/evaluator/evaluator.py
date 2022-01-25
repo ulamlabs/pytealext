@@ -1,3 +1,4 @@
+from math import isqrt
 from typing import IO
 
 from algosdk.future.transaction import ApplicationCallTxn
@@ -119,6 +120,11 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             ab = a + b
             stack.extend(split128(ab))
+        elif line == "bitlen":
+            a = stack.pop()
+            if isinstance(a, bytes):
+                a = int.from_bytes(a, "big")
+            stack.append(a.bit_length())
         elif line == "divmodw":
             divisor_lo = stack.pop()
             divisor_hi = stack.pop()
@@ -137,6 +143,47 @@ def eval_teal(
             remainder = dividend % divisor
             stack.extend(split128(quotient))
             stack.extend(split128(remainder))
+        elif line == "|":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a | b)
+        elif line == "&":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a & b)
+        elif line == "^":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a ^ b)
+        elif line == "~":
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("Invalid type", current_line)
+            x = (INTEGER_SIZE - 1) ^ a
+            stack.append(x)
+        elif line == "shl":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a << b % 2**64)
+        elif line == "shr":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a >> b)
+        elif line == "sqrt":
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(isqrt(a))
         elif line == "assert":
             a = stack.pop()
             if not isinstance(a, int):
@@ -166,12 +213,6 @@ def eval_teal(
             if not isinstance(a, int):
                 raise Panic("Invalid type", current_line)
             x = int(not a)
-            stack.append(x)
-        elif line == "~":
-            a = stack.pop()
-            if not isinstance(a, int):
-                raise Panic("Invalid type", current_line)
-            x = (INTEGER_SIZE - 1) ^ a
             stack.append(x)
         elif line == "+":
             b = stack.pop()
@@ -224,12 +265,24 @@ def eval_teal(
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
             stack.append(int(bool(a > b)))
+        elif line == ">=":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(a >= b)))
         elif line == "<":
             b = stack.pop()
             a = stack.pop()
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
             stack.append(int(bool(a < b)))
+        elif line == "<=":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(a <= b)))
         elif line == "==":
             b = stack.pop()
             a = stack.pop()
@@ -294,6 +347,43 @@ def eval_teal(
                 raise Panic("btoi requires bytes of length 8 or less", current_line)
             val = int.from_bytes(val, "big")
             stack.append(val)
+        elif line == "concat":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(a + b)
+        elif line == "extract3":
+            c = stack.pop()
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, int) or not isinstance(c, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a[b:b + c])
+        elif line == "extract_uint16":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            if b + 2 > len(a):
+                raise Panic("Out of bounds", current_line)
+            stack.append(int.from_bytes(a[b:b + 2], "big"))
+        elif line == "extract_uint32":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            if b + 4 > len(a):
+                raise Panic("Out of bounds", current_line)
+            stack.append(int.from_bytes(a[b:b + 4], "big"))
+        elif line == "extract_uint64":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            if b + 8 > len(a):
+                raise Panic("Out of bounds", current_line)
+            stack.append(int.from_bytes(a[b:b + 8], "big"))
         # provisional support for txna
         elif line.startswith("txna ApplicationArgs"):
             arg_index = int(line.split(" ")[-1])
