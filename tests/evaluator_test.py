@@ -1,12 +1,13 @@
 from hypothesis import given
 from hypothesis import strategies as st
-from pyteal import Btoi, Bytes, Int, Itob, Log, Mode, Pop, Seq, compileTeal
+from pyteal import Btoi, Bytes, Int, Itob, Log, Mode, Pop, Seq, compileTeal, ExtractUint16, ExtractUint32, ExtractUint64, Extract, Expr
 import pytest
 
 from pytealext.evaluator import eval_teal, EvalContext, Panic
 
-VERSION = 5
+from tests.helpers import compile_and_run
 
+VERSION = 5
 
 @given(
     i=st.integers(min_value=0, max_value=2 ** 64 - 1),
@@ -85,3 +86,32 @@ def test_int_out_of_range_int_fails():
     for program in programs:
         with pytest.raises(Panic):
             eval_teal(program)
+
+def test_extract_uint():
+    raw_bytes = b"1234567890,./[]123sdf[vl"
+
+    extract_functions = [
+        (ExtractUint16, 2),
+        (ExtractUint32, 4),
+        (ExtractUint64, 8),
+    ]
+
+    for ExtractUint, width in extract_functions:
+        test_program = Seq(
+            ExtractUint(Bytes(raw_bytes), Int(7)) == Btoi(Bytes(raw_bytes[7:7+width])),
+        )
+
+        stack, _ = compile_and_run(test_program)
+
+        assert len(stack) == 1
+        assert stack[0] == 1
+
+def test_extract():
+    raw_bytes = b" ,./l;'p[]90-0-=zxcvhfjrituy"
+
+    test_program = Extract(Bytes(raw_bytes), Int(3), Int(10)) == Bytes(raw_bytes[3:3+10])
+
+    stack, _ = compile_and_run(test_program)
+
+    assert len(stack) == 1
+    assert stack[0] == 1

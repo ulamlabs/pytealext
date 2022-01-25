@@ -7,6 +7,8 @@ from pyteal import And, Expr, Int, Mode, Not, Or, compileTeal
 from pytealext import LazyAnd, LazyOr, Max, Min
 from pytealext.evaluator import eval_teal
 
+from tests.helpers import compile_and_run
+
 u64_strategy = st.integers(min_value=0, max_value=2 ** 64 - 1)
 # TEAL version to use for testing
 VERSION = 4
@@ -35,12 +37,6 @@ def test_lazyand_boolean_equivalence_with_and(vals: list):
     assert len(stack_eager) == 1
 
     assert stack_lazy[0] == stack_eager[0]
-
-
-def compile_and_run(ast: Expr, mode=Mode.Application, version=VERSION) -> Tuple[list, list]:
-    compiled = compileTeal(ast, mode, version=version)
-    return eval_teal(compiled.splitlines())
-
 
 @given(vals=st.lists(st.integers(min_value=0, max_value=2 ** 64 - 1).map(Int), min_size=2))
 def test_lazyor_boolean_equivalence_with_or(vals: list):
