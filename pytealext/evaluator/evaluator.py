@@ -176,7 +176,7 @@ def eval_teal(
             a = stack.pop()
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
-            stack.append(a << b % 2**64)
+            stack.append(a << b % 2 ** 64)
         elif op == "shr":
             b = stack.pop()
             a = stack.pop()
@@ -363,7 +363,16 @@ def eval_teal(
             a = stack.pop()
             if not isinstance(a, bytes) or not isinstance(b, int) or not isinstance(c, int):
                 raise Panic("Invalid type", current_line)
-            stack.append(a[b:b + c])
+            stack.append(a[b : b + c])
+        elif op == "extract":
+            a = stack.pop()
+            start = int(args[0])
+            length = int(args[1])
+            if not isinstance(a, bytes):
+                raise Panic("Invalid type", current_line)
+            if start < 0 or length < 0 or start + length > len(a):
+                raise Panic("Invalid slice", current_line)
+            stack.append(a[start : start + length])
         elif op == "extract_uint16":
             b = stack.pop()
             a = stack.pop()
@@ -371,7 +380,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if b + 2 > len(a):
                 raise Panic("Out of bounds", current_line)
-            stack.append(int.from_bytes(a[b:b + 2], "big"))
+            stack.append(int.from_bytes(a[b : b + 2], "big"))
         elif op == "extract_uint32":
             b = stack.pop()
             a = stack.pop()
@@ -379,7 +388,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if b + 4 > len(a):
                 raise Panic("Out of bounds", current_line)
-            stack.append(int.from_bytes(a[b:b + 4], "big"))
+            stack.append(int.from_bytes(a[b : b + 4], "big"))
         elif op == "extract_uint64":
             b = stack.pop()
             a = stack.pop()
@@ -387,7 +396,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if b + 8 > len(a):
                 raise Panic("Out of bounds", current_line)
-            stack.append(int.from_bytes(a[b:b + 8], "big"))
+            stack.append(int.from_bytes(a[b : b + 8], "big"))
         # provisional support for txna
         elif op == "txna":
             if args[0] == "ApplicationArgs":
@@ -413,9 +422,7 @@ def eval_teal(
         elif op == "int":
             x = int(args[0])
             if x < 0 or x >= INTEGER_SIZE:
-                raise Panic(
-                    f"int expects non-negative integer smaller than {INTEGER_SIZE} (actual={x})", current_line
-                )
+                raise Panic(f"int expects non-negative integer smaller than {INTEGER_SIZE} (actual={x})", current_line)
             stack.append(x)
         elif op == "bnz":
             cond = stack.pop()
