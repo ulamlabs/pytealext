@@ -1,13 +1,27 @@
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
-from pyteal import Btoi, Bytes, Int, Itob, Log, Mode, Pop, Seq, compileTeal, ExtractUint16, ExtractUint32, ExtractUint64, Extract, Expr
-import pytest
+from pyteal import (
+    Btoi,
+    Bytes,
+    Extract,
+    ExtractUint16,
+    ExtractUint32,
+    ExtractUint64,
+    Int,
+    Itob,
+    Log,
+    Mode,
+    Pop,
+    Seq,
+    compileTeal,
+)
 
-from pytealext.evaluator import eval_teal, EvalContext, Panic
-
+from pytealext.evaluator import EvalContext, Panic, eval_teal
 from tests.helpers import compile_and_run
 
 VERSION = 5
+
 
 @given(
     i=st.integers(min_value=0, max_value=2 ** 64 - 1),
@@ -66,26 +80,23 @@ def test_equals():
     stack, _ = eval_teal(expr_bad_b_asm.splitlines())
     assert stack == [0]
 
+
 def test_math_ops_fail_with_byte_type():
-    ops = [
-        "addw", "mulw", "/", "%", "+", "-", "*", "&&", "||", ">", "<"
-    ]
-    bad_programs = [
-        ["byte 0x01", "byte 0x02"],
-        ["byte 0x03", "int 4"],
-        ["int 5", "byte 0x06"]
-    ]
+    ops = ["addw", "mulw", "/", "%", "+", "-", "*", "&&", "||", ">", "<"]
+    bad_programs = [["byte 0x01", "byte 0x02"], ["byte 0x03", "int 4"], ["int 5", "byte 0x06"]]
     for op in ops:
         for bad_program in bad_programs:
             bp = bad_program + [op]
             with pytest.raises(Panic, match="Invalid type"):
                 eval_teal(bp)
 
+
 def test_int_out_of_range_int_fails():
     programs = [[f"int {2**64}"], ["int -1"]]
     for program in programs:
         with pytest.raises(Panic):
             eval_teal(program)
+
 
 def test_extract_uint():
     raw_bytes = b"1234567890,./[]123sdf[vl"
@@ -98,7 +109,7 @@ def test_extract_uint():
 
     for ExtractUint, width in extract_functions:
         test_program = Seq(
-            ExtractUint(Bytes(raw_bytes), Int(7)) == Btoi(Bytes(raw_bytes[7:7+width])),
+            ExtractUint(Bytes(raw_bytes), Int(7)) == Btoi(Bytes(raw_bytes[7 : 7 + width])),
         )
 
         stack, _ = compile_and_run(test_program)
@@ -106,10 +117,11 @@ def test_extract_uint():
         assert len(stack) == 1
         assert stack[0] == 1
 
+
 def test_extract():
     raw_bytes = b" ,./l;'p[]90-0-=zxcvhfjrituy"
 
-    test_program = Extract(Bytes(raw_bytes), Int(3), Int(10)) == Bytes(raw_bytes[3:3+10])
+    test_program = Extract(Bytes(raw_bytes), Int(3), Int(10)) == Bytes(raw_bytes[3 : 3 + 10])
 
     stack, _ = compile_and_run(test_program)
 

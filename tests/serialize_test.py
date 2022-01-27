@@ -9,7 +9,7 @@ from pytealext.serialize import DeserializeIntegers, DeserializeIntegersToSlots,
 
 @given(
     ints=st.lists(st.integers(0, 2 ** 64 - 1), min_size=1, max_size=24),  #
-    width=st.just(64) | st.just(32) | st.just(16)
+    width=st.just(64) | st.just(32) | st.just(16),
 )
 def test_serialize_integers(ints: list[int], width: int):
     byte = ScratchSlot(0)
@@ -26,7 +26,7 @@ def test_serialize_integers(ints: list[int], width: int):
 
 @given(
     ints=st.lists(st.integers(0, 2 ** 64 - 1), min_size=1, max_size=24),  #
-    width=st.just(64) | st.just(32) | st.just(16)
+    width=st.just(64) | st.just(32) | st.just(16),
 )
 def test_serialize_deserialize_idempotency(ints: list[int], width: int):
     # trimm the numbers to the width so that the functions are truly idempotent
@@ -47,9 +47,10 @@ def test_serialize_deserialize_idempotency(ints: list[int], width: int):
     for actual, expected in zip(slots[: len(ints)], ints):
         assert actual == expected
 
+
 @given(
     ints=st.lists(st.integers(0, 2 ** 64 - 1), min_size=1, max_size=24),  #
-    width=st.just(64) | st.just(32) | st.just(16)
+    width=st.just(64) | st.just(32) | st.just(16),
 )
 def test_serialize_deserialize_to_slots_idempotency(ints: list[int], width: int):
     # trimm the numbers to the width so that the functions are truly idempotent
@@ -60,7 +61,7 @@ def test_serialize_deserialize_to_slots_idempotency(ints: list[int], width: int)
     expr = Seq(
         byte.store(SerializeIntegers(*[Int(i) for i in ints], width=width)),
         DeserializeIntegersToSlots(byte.load(), *deserialized_integers, width=width),
-        Approve()
+        Approve(),
     )
     expr_asm = compileTeal(expr, Mode.Application, version=5)
 
