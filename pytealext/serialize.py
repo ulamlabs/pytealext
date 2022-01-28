@@ -24,11 +24,17 @@ class ExtractSL(Expr):
     Extract a slice from a bytes value with fixed starting point and length.
 
     More efficient than Extract if start and length are known while building the AST.
+
+    This will become obsolete in the upcoming PyTEAL version
     """
 
     def __init__(self, start: int, length: int, arg: Expr):
         super().__init__()
         require_type(arg.type_of(), TealType.bytes)
+        if start > 255 or start < 0:
+            raise ValueError("start must be between 0 and 255")
+        if length > 255 or length < 0:
+            raise ValueError("length must be between 0 and 255")
         self.arg = arg
         self.start = start
         self.length = length

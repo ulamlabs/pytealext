@@ -7,6 +7,7 @@ Additional useful operations for Python
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation
 - [Inner Transactions](docs/inner_transactions.md): simplified making of inner transactions
     - `MakeInnerPaymentTxn`, `MakeInnerAssetTransferTxn` and more!
+- `SerializeIntegers`, `DeserializeIntegers`, `DeserializeIntegersToSlots`: serialize/deserialize integers to/from bytes
 
 ### State manipulation
 `GlobalState` and `LocalState` allow for manipulating global and local state respectively.
