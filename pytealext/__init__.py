@@ -10,8 +10,8 @@ from .inner_transactions import (
 )
 from .lazy import LazyAnd, LazyOr
 from .muldiv64 import MulDiv64
+from .serialize import DeserializeIntegers, DeserializeIntegersToSlots, SerializeIntegers
 from .state import GlobalState, LocalState, get_global_state_ex
-from .serialize import SerializeIntegers, DeserializeIntegers, DeserializeIntegersToSlots
 
 __all__ = [
     "assemble_steps",

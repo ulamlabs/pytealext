@@ -2,6 +2,9 @@ import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 from pyteal import (
+    And,
+    App,
+    Assert,
     Btoi,
     Bytes,
     Extract,
@@ -127,3 +130,49 @@ def test_extract():
 
     assert len(stack) == 1
     assert stack[0] == 1
+
+
+def test_local_state():
+    mapping = {
+        b"0": 0,
+        b"1": 1,
+        b"2": 2,
+        b"3": 3,
+        b"4": 4,
+        b"5": 5,
+        b"6": 6,
+        b"7": 7,
+        b"8": 8,
+        b"9": 923409342890234890,
+        b"a": b"a",
+        b"b": b"b",
+        b"c": b"c",
+        b"d": b"d",
+        b"e": b"e",
+        b"f": b"f",
+    }
+
+    program = Seq(
+        *[
+            App.localPut(Int(0), Bytes(key), (Bytes(value) if isinstance(value, bytes) else Int(value)))
+            for key, value in mapping.items()
+        ],
+        And(
+            *[
+                App.localGet(Int(0), Bytes(key)) == (Bytes(value) if isinstance(value, bytes) else Int(value))
+                for key, value in mapping.items()
+            ]
+        ),
+    )
+
+    ctx = EvalContext()
+
+    compiled = compileTeal(program, Mode.Application, version=VERSION)
+
+    stack, _ = eval_teal(compiled.splitlines(), context=ctx)
+
+    assert len(stack) == 1
+    assert stack[0] == 1
+
+    for k, v in mapping.items():
+        assert ctx.local_state[k] == v

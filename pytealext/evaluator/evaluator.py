@@ -29,19 +29,30 @@ class AssertionFailed(Panic):
 MaxLogCalls = 32
 MaxLogSize = 1024
 
+MaxLocalStateSize = 16
+MaxGlobalStateSize = 64
+
 
 class EvalContext:
     """
     Class containing the execution environment for an application call
     """
 
-    def __init__(self, global_state: dict[bytes, bytes or int] or None = None, txn: ApplicationCallTxn or None = None):
+    def __init__(
+        self,
+        *,
+        global_state: dict[bytes, bytes or int] or None = None,
+        local_state: dict[bytes, bytes or int] or None = None,
+        txn: ApplicationCallTxn or None = None,
+    ):
         """
         Args:
             global_state: The global state of the application
+            local_state: The local state of the user interacting with the application
             txn: The transaction that is being evaluated
         """
         self.global_state = global_state if global_state is not None else {}  # type: dict[bytes, int or bytes]
+        self.local_state = local_state if local_state is not None else {}  # type: dict[bytes, int or bytes]
         self.txn = txn
         self.log = []  # type: list[bytes]
 
@@ -326,6 +337,27 @@ def eval_teal(
             if context is None:
                 raise Exception("app_global_put requires execution environment context")
             context.global_state[a] = b
+            if len(context.global_state) > MaxGlobalStateSize:
+                raise Panic("Global state size exceeded", current_line)
+        elif op == "app_local_get":
+            b = stack.pop()
+            a = stack.pop()
+            if a != 0:
+                raise Panic("app_local_get is only supported with 0 as the account parameter", current_line)
+            if not isinstance(b, bytes):
+                raise Panic("app_local_get key must be a bytes value", current_line)
+            stack.append(context.local_state.get(b, 0))
+        elif op == "app_local_put":
+            c = stack.pop()
+            b = stack.pop()
+            a = stack.pop()
+            if a != 0:
+                raise Panic("app_local_put is only supported with 0 as the account parameter", current_line)
+            if not isinstance(b, bytes):
+                raise Panic("app_local_put key must be a bytes value", current_line)
+            context.local_state[b] = c
+            if len(context.local_state) > MaxLocalStateSize:
+                raise Panic("Local state size exceeded", current_line)
         elif op == "log":
             val = stack.pop()
             if not isinstance(val, bytes):
