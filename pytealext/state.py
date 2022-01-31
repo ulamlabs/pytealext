@@ -1,6 +1,6 @@
 from typing import Union
 
-from pyteal import App, Bytes, Expr, Int, MaybeValue, TealType
+from pyteal import App, Bytes, Concat, Expr, Int, Itob, MaybeValue, TealType
 from pyteal.types import require_type
 
 
@@ -88,3 +88,58 @@ def get_global_state_ex(foreign_id: int, key: str) -> MaybeValue:
     https://pyteal.readthedocs.io/en/stable/state.html#external-global
     """
     return App.globalGetEx(Int(foreign_id), Bytes(key))
+
+
+class StateArray:
+    """
+    Wrapper for state access which utilizes multiple slots in global state
+    """
+
+    def __init__(self, prefix: Union[str, Expr], *, human_readable: bool = False):
+        """
+        Args:
+            size: number of slots in the array
+            prefix: a key prefix in the global state, if it's a string it will be converted to Bytes
+            human_readable: if True, the indexes will be serialized as a human-readable format
+                (e.g. "ARR0", "ARR1", ...) otherwise the names are raw serialized big endian integers
+        """
+        self._prefix = prefix
+        self._hr = human_readable
+
+        if self._hr:
+            raise NotImplementedError("Human readable indexes are not implemented yet")
+
+    def key_at_index(self, index: Union[int, Expr]) -> Expr:
+        """
+        Get the actual key (bytes) that will be used to access the state information
+        """
+        if isinstance(index, int):
+            if isinstance(self._prefix, str):
+                # compile-time optimization
+                return Bytes(self._prefix + str(index))
+            return Concat(self._prefix, Bytes(index.to_bytes(8, "big")))
+        else:  # isinstance(index, Expr)
+            if isinstance(self._prefix, str):
+                return Concat(Bytes(self._prefix), Itob(index))
+            return Concat(self._prefix, index)
+
+    def __getitem__(self, index: Union[int, Expr]):
+        raise NotImplementedError
+
+
+class LocalStateArray(StateArray):
+    """
+    Wrapper for local state access which utilizes multiple slots in local state
+    """
+
+    def __getitem__(self, index: Union[int, Expr]):
+        return LocalState(self.key_at_index(index))
+
+
+class GlobalStateArray(StateArray):
+    """
+    Wrapper for global state access which utilizes multiple slots in global state
+    """
+
+    def __getitem__(self, index: Union[int, Expr]):
+        return GlobalState(self.key_at_index(index))

@@ -4,7 +4,6 @@ from hypothesis import strategies as st
 from pyteal import (
     And,
     App,
-    Assert,
     Btoi,
     Bytes,
     Extract,
