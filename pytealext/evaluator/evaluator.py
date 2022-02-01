@@ -439,8 +439,6 @@ def eval_teal(
             else:
                 raise Exception("Unsupported txna expression")
         elif op == "byte":
-            print(line)
-            print(op, args)
             arg = args[0]
             if arg[0] == '"' and arg[-1] == '"':
                 arg = arg[1:-1]  # strip quotes

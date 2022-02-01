@@ -95,19 +95,13 @@ class StateArray:
     Wrapper for state access which utilizes multiple slots in global state
     """
 
-    def __init__(self, prefix: Union[str, Expr], *, human_readable: bool = False):
+    def __init__(self, prefix: Union[str, Expr]):
         """
         Args:
             size: number of slots in the array
             prefix: a key prefix in the global state, if it's a string it will be converted to Bytes
-            human_readable: if True, the indexes will be serialized as a human-readable format
-                (e.g. "ARR0", "ARR1", ...) otherwise the names are raw serialized big endian integers
         """
         self._prefix = prefix
-        self._hr = human_readable
-
-        if self._hr:
-            raise NotImplementedError("Human readable indexes are not implemented yet")
 
     def key_at_index(self, index: Union[int, Expr]) -> Expr:
         """
@@ -115,13 +109,16 @@ class StateArray:
         """
         if isinstance(index, int):
             if isinstance(self._prefix, str):
-                # compile-time optimization
-                return Bytes(self._prefix + str(index))
+                # index: int, prefix: str
+                return Bytes(self._prefix.encode("utf-8") + index.to_bytes(8, "big"))
+            # index: int, prefix: Expr
             return Concat(self._prefix, Bytes(index.to_bytes(8, "big")))
         else:  # isinstance(index, Expr)
             if isinstance(self._prefix, str):
+                # index: Expr, prefix: str
                 return Concat(Bytes(self._prefix), Itob(index))
-            return Concat(self._prefix, index)
+            # index: Expr, prefix: Expr (u64)
+            return Concat(self._prefix, Itob(index))
 
     def __getitem__(self, index: Union[int, Expr]):
         raise NotImplementedError
