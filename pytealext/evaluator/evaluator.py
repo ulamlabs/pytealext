@@ -432,7 +432,7 @@ def eval_teal(
         # provisional support for txna
         elif op == "txna":
             if args[0] == "ApplicationArgs":
-                arg_index = args[1]
+                arg_index = int(args[1])
                 if arg_index > len(context.txn.app_args):
                     raise Panic("txna ApplicationArgs index out of bounds", current_line)
                 stack.append(context.txn.app_args[arg_index])

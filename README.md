@@ -32,6 +32,7 @@ program = Seq(
 
 Want to simulate arrays in the global state? Use `GlobalStateArray` and `LocalStateArray`.
 Technically, the indexes can be any uint64 value and don't have to be sequential.
+Each array element takes one slot in the local/global state.
 ```python
 from pyteal import Assert, For, Int, Return, ScratchVar, Seq
 from pytealext import LocalStateArray
