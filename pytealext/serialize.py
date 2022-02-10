@@ -126,6 +126,8 @@ def DeserializeIntegersToSlots(serialized: Expr, *slots: ScratchVar or ScratchSl
     The deserialized integers are put in the provided slots.
     This function will fail on runtime if the byte string is too short.
 
+    `serialized` will be stored in the scratch space for efficiency and therefore only evaluated once.
+
     Args:
         serialized: The byte string to deserialize.
         slots: The scratch slots to put the deserialized integers in.
@@ -139,5 +141,11 @@ def DeserializeIntegersToSlots(serialized: Expr, *slots: ScratchVar or ScratchSl
     else:
         raise ValueError(f"Invalid width: {width}")
 
+    # guarantee fast access for extract uint
+    tmp = ScratchVar()
+
     byte_width = width // 8
-    return Seq([slot.store(ExtractUint(serialized, Int(i * byte_width))) for i, slot in enumerate(slots)])
+    return Seq(
+        tmp.store(serialized),
+        *[slot.store(ExtractUint(tmp.load(), Int(i * byte_width))) for i, slot in enumerate(slots)],
+    )
