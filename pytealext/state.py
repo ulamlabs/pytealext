@@ -92,14 +92,14 @@ def get_global_state_ex(foreign_id: int, key: str) -> MaybeValue:
 
 class StateArray:
     """
-    Wrapper for state access which utilizes multiple slots in global state
+    Wrapper for state access which utilizes multiple slots
     """
 
     def __init__(self, prefix: Union[str, Expr]):
         """
         Args:
-            size: number of slots in the array
-            prefix: a key prefix in the global state, if it's a string it will be converted to Bytes
+            prefix: a key prefix in the global state, if it's a string it will be converted to Bytes.
+            Prefix should be unique to avoid naming conflicts.
         """
         self._prefix = prefix
 
@@ -133,6 +133,16 @@ class LocalStateArray(StateArray):
         return LocalState(self.key_at_index(index))
 
 
+class LocalStateArray2D(StateArray):
+    """
+    Wrapper for local state access which utilizes multiple slots in local state organized in 2D array
+    """
+
+    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
+        length, width = indices
+        return LocalStateArray(self.key_at_index(length))[width]
+
+
 class GlobalStateArray(StateArray):
     """
     Wrapper for global state access which utilizes multiple slots in global state
@@ -140,3 +150,13 @@ class GlobalStateArray(StateArray):
 
     def __getitem__(self, index: Union[int, Expr]):
         return GlobalState(self.key_at_index(index))
+
+
+class GlobalStateArray2D(StateArray):
+    """
+    Wrapper for global state access which utilizes multiple slots in global state organized in 2D array
+    """
+
+    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
+        length, width = indices
+        return GlobalStateArray(self.key_at_index(length))[width]

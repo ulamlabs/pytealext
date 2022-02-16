@@ -8,7 +8,7 @@ Additional useful operations for Python
 - [Inner Transactions](docs/inner_transactions.md): simplified making of inner transactions
     - `MakeInnerPaymentTxn`, `MakeInnerAssetTransferTxn` and more!
 - `SerializeIntegers`, `DeserializeIntegers`, `DeserializeIntegersToSlots`: serialize/deserialize integers to/from bytes
-- `GlobalState`, `LocalState`, `GlobalStateArray`, `LocalStateArray`: easily access global/local state
+- `GlobalState`, `LocalState`, `GlobalStateArray`, `LocalStateArray`, `GlobalStateArray2D`, `LocalStateArray2D`: easily access global/local state
 
 ### State manipulation
 `GlobalState` and `LocalState` allow for manipulating global and local state respectively.
