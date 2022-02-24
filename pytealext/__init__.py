@@ -10,13 +10,14 @@ from .inner_transactions import (
 )
 from .lazy import LazyAnd, LazyOr
 from .muldiv64 import MulDiv64
-from .serialize import DeserializeIntegers, DeserializeIntegersToSlots, SerializeIntegers
+from .serialize import DeserializeIntegers, DeserializeIntegersToSlots, ExtractSL, SerializeIntegers
 from .state import GlobalState, GlobalStateArray, GlobalStateArray2D, LocalState, LocalStateArray, LocalStateArray2D, get_global_state_ex
 
 __all__ = [
     "assemble_steps",
     "evaluator",
     "CompareAndSelect",
+    "ExtractSL",
     "MakeInnerTxn",
     "MakeInnerPaymentTxn",
     "MakeInnerAssetTransferTxn",
