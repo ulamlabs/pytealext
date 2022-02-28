@@ -12,7 +12,7 @@ class LazyAnd(Expr):
         super().__init__()
         self.args = args
         for arg in args:
-            require_type(arg.type_of(), TealType.uint64)
+            require_type(arg, TealType.uint64)
         if len(args) < 1:
             raise TealInputError("LazyAnd expects at least 1 argument")
 
@@ -46,7 +46,7 @@ class LazyOr(Expr):
         super().__init__()
         self.args = args
         for arg in args:
-            require_type(arg.type_of(), TealType.uint64)
+            require_type(arg, TealType.uint64)
         if len(args) < 1:
             raise TealInputError("LazyOr expects at least 1 argument")
 

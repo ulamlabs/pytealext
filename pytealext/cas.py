@@ -20,8 +20,8 @@ class CompareAndSelect(Expr):
         self.rhs = rhs
         self.op = op
 
-        require_type(lhs.type_of(), expected_type)
-        require_type(rhs.type_of(), expected_type)
+        require_type(lhs, expected_type)
+        require_type(rhs, expected_type)
 
     def type_of(self) -> TealType:
         return self.lhs.type_of()

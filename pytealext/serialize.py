@@ -30,7 +30,7 @@ class ExtractSL(Expr):
 
     def __init__(self, start: int, length: int, arg: Expr):
         super().__init__()
-        require_type(arg.type_of(), TealType.bytes)
+        require_type(arg, TealType.bytes)
         if start > 255 or start < 0:
             raise ValueError("start must be between 0 and 255")
         if length > 255 or length < 0:
@@ -116,7 +116,7 @@ class DeserializeIntegers:
         if isinstance(index, int):
             return self.ExtractUint(self.serialized, Int(index * self.bytes_width))
 
-        require_type(index.type_of(), TealType.uint64)
+        require_type(index, TealType.uint64)
         return self.ExtractUint(self.serialized, index * Int(self.bytes_width))
 
 

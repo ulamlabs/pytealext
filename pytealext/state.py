@@ -60,7 +60,7 @@ class LocalState(State):
     """
 
     def put(self, value: Expr) -> App:
-        require_type(value.type_of(), self.type_hint)
+        require_type(value, self.type_hint)
         return App.localPut(Int(0), self._name, value)
 
     def get(self) -> App:
@@ -73,7 +73,7 @@ class GlobalState(State):
     """
 
     def put(self, value: Expr) -> App:
-        require_type(value.type_of(), self.type_hint)
+        require_type(value, self.type_hint)
         return App.globalPut(self._name, value)
 
     def get(self) -> App:

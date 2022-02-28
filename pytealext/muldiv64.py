@@ -22,9 +22,9 @@ class MulDiv64(Expr):
         """
         super().__init__()
         # make sure that argument expressions have the correct return type
-        require_type(m1.type_of(), TealType.uint64)
-        require_type(m2.type_of(), TealType.uint64)
-        require_type(d.type_of(), TealType.uint64)
+        require_type(m1, TealType.uint64)
+        require_type(m2, TealType.uint64)
+        require_type(d, TealType.uint64)
         self.m1 = m1
         self.m2 = m2
         self.d = d
