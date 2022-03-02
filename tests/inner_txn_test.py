@@ -1,7 +1,19 @@
 from inspect import getfullargspec
 
 import pytest
-from pyteal import Addr, App, Bytes, CompileOptions, Global, Int, Mode, TealBlock, TealComponent, TxnField, TxnType
+from pyteal import (
+    Addr,
+    App,
+    Bytes,
+    CompileOptions,
+    Global,
+    Int,
+    Mode,
+    TealBlock,
+    TealComponent,
+    TxnField,
+    TxnType,
+)
 
 from pytealext.inner_transactions import *  # pylint: disable=unused-wildcard-import
 
@@ -13,15 +25,15 @@ def get_arg_names(f):
     return fas[0]  # list of parameter names
 
 
-compiler_v5 = CompileOptions(mode=Mode.Application, version=5)
+compiler_v6 = CompileOptions(mode=Mode.Application, version=6)
 
 
 def assert_equal_expr(ast_actual: Expr, ast_expected: Expr):
-    actual, _ = ast_actual.__teal__(compiler_v5)
+    actual, _ = ast_actual.__teal__(compiler_v6)
     actual.addIncoming()
     actual = TealBlock.NormalizeBlocks(actual)
 
-    expected, _ = ast_expected.__teal__(compiler_v5)
+    expected, _ = ast_expected.__teal__(compiler_v6)
     expected.addIncoming()
     expected = TealBlock.NormalizeBlocks(expected)
 
@@ -107,3 +119,70 @@ def test_MakeInnerAssetConfigTxn():
         )
 
         assert_equal_expr(ast_actual, ast_expected)
+
+
+@pytest.mark.parametrize(
+    "inner_txn_function,type_enum",
+    (
+        (InnerPaymentTxn, TxnType.Payment),
+        (InnerAssetTransferTxn, TxnType.AssetTransfer),
+        (InnerAssetFreezeTxn, TxnType.AssetFreeze),
+        (InnerAssetConfigTxn, TxnType.AssetConfig),
+    ),
+)
+def test_InnerTxns(inner_txn_function, type_enum):
+    params = get_arg_names(inner_txn_function)
+
+    for param in params:
+        ast_actual = inner_txn_function(**{param: App.localGet(Int(0), Bytes("test"))})
+
+        ast_expected = Seq(
+            InnerTxnBuilder.SetField(TxnField.type_enum, type_enum),
+            InnerTxnBuilder.SetField(TxnField[param], App.localGet(Int(0), Bytes("test"))),
+        )
+
+        assert_equal_expr(ast_actual, ast_expected)
+
+
+@pytest.mark.parametrize(
+    "make_inner_expr,inner_expr",
+    (
+        (MakeInnerTxn, InnerTxn),
+        (MakeInnerPaymentTxn, InnerPaymentTxn),
+        (MakeInnerAssetTransferTxn, InnerAssetTransferTxn),
+        (MakeInnerAssetFreezeTxn, InnerAssetFreezeTxn),
+        (MakeInnerAssetConfigTxn, InnerAssetConfigTxn),
+    ),
+)
+def test_MakeInnerGroupTxn_equivalence(make_inner_expr, inner_expr):
+    """Test equivalence of single element GTxn with MakeInnerTxn"""
+
+    assert_equal_expr(
+        make_inner_expr(sender=Global.current_application_address(), fee=Int(997)),
+        MakeInnerGroupTxn(inner_expr(sender=Global.current_application_address(), fee=Int(997))),
+    )
+
+
+def test_makeInnerGroupTxn():
+    ast_actual = MakeInnerGroupTxn(
+        InnerAssetFreezeTxn(freeze_asset_frozen=Int(0)),
+        InnerAssetTransferTxn(asset_receiver=Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE")),
+        InnerAssetConfigTxn(config_asset_unit_name=Bytes("AAA")),
+    )
+
+    ast_expected = Seq(
+        InnerTxnBuilder.Begin(),
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetFreeze),
+        InnerTxnBuilder.SetField(TxnField.freeze_asset_frozen, Int(0)),
+        InnerTxnBuilder.Next(),
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetTransfer),
+        InnerTxnBuilder.SetField(
+            TxnField.asset_receiver, Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE")
+        ),
+        InnerTxnBuilder.Next(),
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetConfig),
+        InnerTxnBuilder.SetField(TxnField.config_asset_unit_name, Bytes("AAA")),
+        InnerTxnBuilder.Submit(),
+    )
+
+    assert_equal_expr(ast_actual, ast_expected)

@@ -1,9 +1,34 @@
 from typing import Optional
 
-from pyteal import Expr, InnerTxnBuilder, Seq, TxnField, TxnType
+from pyteal import CompileOptions, Expr, InnerTxnBuilder, Seq, TealBlock, TealSimpleBlock, TealType, TxnField, TxnType
 
 
-def MakeInnerTxn(**kwargs: Optional[Expr]) -> Expr:
+class InnerTxn(Expr):
+    """
+    An Expression setting fields for a transaction.
+    It is equivalent to the InnerTxnBuilder.SetFields(...) expression.
+    """
+
+    def __init__(self, **kwargs: Optional[Expr]):
+        super().__init__()
+        fields_to_exprs = {TxnField[name]: expr for name, expr in kwargs.items() if expr is not None}
+
+        self.expr = InnerTxnBuilder.SetFields(fields_to_exprs)
+
+    def type_of(self) -> TealType:
+        return TealType.none
+
+    def has_return(self) -> bool:
+        return False
+
+    def __str__(self) -> str:
+        return str(self.expr)
+
+    def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
+        return self.expr.__teal__(options)
+
+
+def MakeInnerTxn(**kwargs: Expr) -> Expr:
     """
     Create and execute arbitrary inner transaction.
     Universal txn maker, allows for setting any fields available in TxnField by name.
@@ -34,16 +59,36 @@ def MakeInnerTxn(**kwargs: Optional[Expr]) -> Expr:
         List of fields that can be set:
         https://developer.algorand.org/docs/get-details/dapps/smart-contracts/apps/#setting-transaction-properties
     """
-    fields_to_exprs = {TxnField[name]: expr for name, expr in kwargs.items() if expr is not None}
     return Seq(
         # black: dont-compact-seq
         InnerTxnBuilder.Begin(),
-        InnerTxnBuilder.SetFields(fields_to_exprs),
+        InnerTxn(**kwargs),
         InnerTxnBuilder.Submit(),
     )
 
 
 # pylint: disable=unused-argument
+
+
+def InnerPaymentTxn(
+    sender: Optional[Expr] = None,
+    receiver: Optional[Expr] = None,
+    amount: Optional[Expr] = None,
+    close_remainder_to: Optional[Expr] = None,
+    fee: Optional[Expr] = None,
+) -> InnerTxn:
+    """
+    Create an inner txn and set provided fields.
+
+    This is equivalent to:
+    ```
+    Seq(
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.Payment),
+        InnerTxnBuilder.SetFields([fields provided as arguments]),
+    )
+    ```
+    """
+    return InnerTxn(type_enum=TxnType.Payment, **locals())
 
 
 def MakeInnerPaymentTxn(
@@ -70,6 +115,28 @@ def MakeInnerPaymentTxn(
     https://pyteal.readthedocs.io/en/latest/api.html#pyteal.InnerTxnBuilder
     """
     return MakeInnerTxn(type_enum=TxnType.Payment, **locals())
+
+
+def InnerAssetTransferTxn(
+    sender: Optional[Expr] = None,
+    asset_receiver: Optional[Expr] = None,
+    asset_amount: Optional[Expr] = None,
+    xfer_asset: Optional[Expr] = None,
+    asset_close_to: Optional[Expr] = None,
+    fee: Optional[Expr] = None,
+) -> InnerTxn:
+    """
+    Create an inner txn and set provided fields.
+
+    This is equivalent to:
+    ```
+    Seq(
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetTransfer),
+        InnerTxnBuilder.SetFields([fields provided as arguments]),
+    )
+    ```
+    """
+    return InnerTxn(type_enum=TxnType.AssetTransfer, **locals())
 
 
 def MakeInnerAssetTransferTxn(
@@ -100,6 +167,27 @@ def MakeInnerAssetTransferTxn(
     return MakeInnerTxn(type_enum=TxnType.AssetTransfer, **locals())
 
 
+def InnerAssetFreezeTxn(
+    sender: Optional[Expr] = None,
+    freeze_asset: Optional[Expr] = None,
+    freeze_asset_account: Optional[Expr] = None,
+    freeze_asset_frozen: Optional[Expr] = None,
+    fee: Optional[Expr] = None,
+) -> InnerTxn:
+    """
+    Create an inner txn and set provided fields.
+
+    This is equivalent to:
+    ```
+    Seq(
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetFreeze),
+        InnerTxnBuilder.SetFields([fields provided as arguments]),
+    )
+    ```
+    """
+    return InnerTxn(type_enum=TxnType.AssetFreeze, **locals())
+
+
 def MakeInnerAssetFreezeTxn(
     sender: Optional[Expr] = None,
     freeze_asset: Optional[Expr] = None,
@@ -121,6 +209,38 @@ def MakeInnerAssetFreezeTxn(
     All freeze_* parameters should be set. Not setting them will cause Undocumented Behaviour.
     """
     return MakeInnerTxn(type_enum=TxnType.AssetFreeze, **locals())
+
+
+def InnerAssetConfigTxn(
+    sender: Optional[Expr] = None,
+    config_asset: Optional[Expr] = None,
+    config_asset_total: Optional[Expr] = None,
+    config_asset_default_frozen: Optional[Expr] = None,
+    config_asset_unit_name: Optional[Expr] = None,
+    config_asset_name: Optional[Expr] = None,
+    config_asset_manager: Optional[Expr] = None,
+    config_asset_reserve: Optional[Expr] = None,
+    config_asset_freeze: Optional[Expr] = None,
+    config_asset_clawback: Optional[Expr] = None,
+    config_asset_url: Optional[Expr] = None,
+    config_asset_metadata_hash: Optional[Expr] = None,
+    config_asset_decimals: Optional[Expr] = None,
+    fee: Optional[Expr] = None,
+) -> InnerTxn:
+    """
+    Create and execute an inner asset config transaction.
+
+    This is equivalent to:
+    ```
+    Seq(
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetConfig),
+        InnerTxnBuilder.SetFields([fields provided as arguments]),
+    )
+    ```
+
+    Reference: `MakeInnerAssetConfigTxn`
+    """
+    return InnerTxn(type_enum=TxnType.AssetConfig, **locals())
 
 
 def MakeInnerAssetConfigTxn(
@@ -177,3 +297,26 @@ def MakeInnerAssetConfigTxn(
         Cleared addresses will be locked forever.
     """
     return MakeInnerTxn(type_enum=TxnType.AssetConfig, **locals())
+
+
+def MakeInnerGroupTxn(*txns: InnerTxn) -> Expr:
+    """
+    Create and execute inner atomic group transaction.
+
+    Each of the transactions' fields will be set in order.
+    And the transaction group will be executed afterwards.
+
+    Args:
+        txns: list of inner transactions to be executed as part of the group
+    """
+    for txn in txns:
+        if not isinstance(txn, InnerTxn):
+            raise ValueError("MakeInnerGroupTxn can only take instances of InnerTxn as parameters")
+    steps = []
+    for i, txn in enumerate(txns):
+        steps.append(txn)
+        if i == len(txns) - 1:
+            steps.append(InnerTxnBuilder.Submit())
+        else:
+            steps.append(InnerTxnBuilder.Next())
+    return Seq(InnerTxnBuilder.Begin(), *steps)
