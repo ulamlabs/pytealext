@@ -5,7 +5,7 @@ Additional useful operations for Python
 - `MulDiv64`: calculate `m1*m2/d` with no overflow on multiplication (TEAL 3+)
 - `Min`, `Max`: calculate minimum/maximum of 2 expressions, without using slots or evaluating arguments more than once (TEAL 4+)
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation
-- [Inner Transactions](docs/inner_transactions.md): simplified making of inner transactions
+- [Inner Transactions](https://github.com/ulamlabs/pytealext/blob/main/docs/inner_transactions.md): simplified making of inner transactions
     - `MakeInnerPaymentTxn`, `MakeInnerAssetTransferTxn` and more!
     - `MakeInnerGroupTxn` to execute inner atomic group transactions
 - `SerializeIntegers`, `DeserializeIntegers`, `DeserializeIntegersToSlots`: serialize/deserialize integers to/from bytes
