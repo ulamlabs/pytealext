@@ -313,6 +313,7 @@ def InnerApplicationCallTxn(
     global_num_uints: Optional[Expr] = None,
     local_num_byte_slices: Optional[Expr] = None,
     local_num_uints: Optional[Expr] = None,
+    extra_program_pages: Optional[Expr] = None,
     fee: Optional[Expr] = None,
 ) -> InnerTxn:
     """
@@ -345,6 +346,7 @@ def MakeInnerApplicationCallTxn(
     global_num_uints: Optional[Expr] = None,
     local_num_byte_slices: Optional[Expr] = None,
     local_num_uints: Optional[Expr] = None,
+    extra_program_pages: Optional[Expr] = None,
     fee: Optional[Expr] = None,
 ) -> Expr:
     """
@@ -364,6 +366,7 @@ def MakeInnerApplicationCallTxn(
         global_num_uints: The maximum number of global uints to be used in the application
         local_num_byte_slices: The maximum number of local byte slices to be used in the application
         local_num_uints: The maximum number of local uints to be used in the application
+        extra_program_pages: The number of extra program space to be allocated for the created application
         fee: The fee for the transaction in microAlgos
 
     For more details about parameters needed for your use-case visit:
