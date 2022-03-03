@@ -60,3 +60,41 @@ program_piece = Seq(
     SimpleAssetTransfer(Addr(PARASITE_ADDRESS), Int(10))
 )
 ```
+
+## Transaction groups
+With TEAL v6 it's possible to create inner transactions in groups.
+Below example presents how to use pytealext to accomplish that.
+
+```python
+from pyteal import *
+from pytealext import MakeInnerGroupTxn, InnerNoOpTxn, InnerAssetTransferTxn
+
+app_to_call = Int(12345)
+amount_to_deposit = Int(100)
+asset_id = Int(222)
+app_address = AppParam.address(app_to_call)
+method = MethodSignature("deposit(string,axfer)void")
+
+# In the parent transaction the following must be set:
+# - Txn.accounts must contain the app_address
+# - Txn.assets must contain the asset_id
+# - Txn.applications must contain app_to_call
+# otherwise the inner txn will fail
+# Should the fee be set to 0 like below, the parent transaction group should pay the fees
+deposit_and_call = Seq(
+    app_address,
+    MakeInnerGroupTxn(
+        InnerAssetTransferTxn(
+            asset_receiver=app_address.value(),
+            asset_amount=amount_to_deposit,
+            xfer_asset=asset_id,
+            fee=Int(0), # must be pooled
+        ),
+        InnerNoOpTxn(
+            application_id=app_to_call,
+            application_args=[method, Bytes("Hello")],
+            fee=Int(0), # must be pooled
+        )
+    ),
+)
+```
