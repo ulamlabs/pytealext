@@ -10,7 +10,11 @@ from pytealext.inner_transactions import *  # pylint: disable=unused-wildcard-im
 
 def get_arg_names(f):
     fas = getfullargspec(f)
-    return fas[0]  # list of parameter names
+    return fas.args  # list of parameter names
+
+def get_arg_annotations(f) -> dict[str, str]:
+    fas = getfullargspec(f)
+    return fas.annotations  # dict of parameter names to annotations
 
 
 compiler_v6 = CompileOptions(mode=Mode.Application, version=6)
@@ -116,18 +120,27 @@ def test_MakeInnerAssetConfigTxn():
         (InnerAssetTransferTxn, TxnType.AssetTransfer),
         (InnerAssetFreezeTxn, TxnType.AssetFreeze),
         (InnerAssetConfigTxn, TxnType.AssetConfig),
+        (InnerApplicationCallTxn, TxnType.ApplicationCall),
     ),
 )
 def test_InnerTxns(inner_txn_function, type_enum):
-    params = get_arg_names(inner_txn_function)
+    argspec = getfullargspec(inner_txn_function)
 
-    for param in params:
-        ast_actual = inner_txn_function(**{param: App.localGet(Int(0), Bytes("test"))})
+    for param in argspec.args: # for each function argument
+        if "list" in str(argspec.annotations[param]): # if it's a list
+            ast_actual = inner_txn_function(**{param: [App.localGet(Int(0), Bytes("test"))]})
 
-        ast_expected = Seq(
-            InnerTxnBuilder.SetField(TxnField.type_enum, type_enum),
-            InnerTxnBuilder.SetField(TxnField[param], App.localGet(Int(0), Bytes("test"))),
-        )
+            ast_expected = Seq(
+                InnerTxnBuilder.SetField(TxnField.type_enum, type_enum),
+                InnerTxnBuilder.SetField(TxnField[param], [App.localGet(Int(0), Bytes("test"))]),
+            )
+        else:
+            ast_actual = inner_txn_function(**{param: App.localGet(Int(0), Bytes("test"))})
+
+            ast_expected = Seq(
+                InnerTxnBuilder.SetField(TxnField.type_enum, type_enum),
+                InnerTxnBuilder.SetField(TxnField[param], App.localGet(Int(0), Bytes("test"))),
+            )
 
         assert_equal_expr(ast_actual, ast_expected)
 
@@ -140,6 +153,8 @@ def test_InnerTxns(inner_txn_function, type_enum):
         (MakeInnerAssetTransferTxn, InnerAssetTransferTxn),
         (MakeInnerAssetFreezeTxn, InnerAssetFreezeTxn),
         (MakeInnerAssetConfigTxn, InnerAssetConfigTxn),
+        (MakeInnerApplicationCallTxn, InnerApplicationCallTxn),
+        (MakeInnerNoOpTxn, InnerNoOpTxn),
     ),
 )
 def test_MakeInnerGroupTxn_equivalence(make_inner_expr, inner_expr):
@@ -155,6 +170,7 @@ def test_makeInnerGroupTxn():
     ast_actual = MakeInnerGroupTxn(
         InnerAssetFreezeTxn(freeze_asset_frozen=Int(0)),
         InnerAssetTransferTxn(asset_receiver=Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE")),
+        InnerNoOpTxn(application_args=[Bytes("CALL"), Bytes("ME"), Bytes("MAYBE")]),
         InnerAssetConfigTxn(config_asset_unit_name=Bytes("AAA")),
     )
 
@@ -167,6 +183,10 @@ def test_makeInnerGroupTxn():
         InnerTxnBuilder.SetField(
             TxnField.asset_receiver, Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE")
         ),
+        InnerTxnBuilder.Next(),
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.ApplicationCall),
+        InnerTxnBuilder.SetField(TxnField.on_completion, OnComplete.NoOp),
+        InnerTxnBuilder.SetField(TxnField.application_args, [Bytes("CALL"), Bytes("ME"), Bytes("MAYBE")]),
         InnerTxnBuilder.Next(),
         InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetConfig),
         InnerTxnBuilder.SetField(TxnField.config_asset_unit_name, Bytes("AAA")),

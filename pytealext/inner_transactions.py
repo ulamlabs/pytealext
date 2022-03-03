@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pyteal import CompileOptions, Expr, InnerTxnBuilder, Seq, TealBlock, TealSimpleBlock, TealType, TxnField, TxnType
+from pyteal import CompileOptions, Expr, InnerTxnBuilder, OnComplete, Seq, TealBlock, TealSimpleBlock, TealType, TxnField, TxnType
 
 
 class InnerTxn(Expr):
@@ -297,6 +297,134 @@ def MakeInnerAssetConfigTxn(
         Cleared addresses will be locked forever.
     """
     return MakeInnerTxn(type_enum=TxnType.AssetConfig, **locals())
+
+
+def InnerApplicationCallTxn(
+    sender: Optional[Expr] = None,
+    application_id: Optional[Expr] = None,
+    on_completion: Optional[Expr] = None,
+    application_args: Optional[list[Expr]] = None,
+    accounts: Optional[list[Expr]] = None,
+    applications: Optional[list[Expr]] = None,
+    assets: Optional[list[Expr]] = None,
+    approval_program: Optional[Expr] = None,
+    clear_state_program: Optional[Expr] = None,
+    global_num_byte_slices: Optional[Expr] = None,
+    global_num_uints: Optional[Expr] = None,
+    local_num_byte_slices: Optional[Expr] = None,
+    local_num_uints: Optional[Expr] = None,
+    fee: Optional[Expr] = None,
+) -> InnerTxn:
+    """
+    Create an inner txn and set provided fields.
+
+    This is equivalent to:
+    ```
+    Seq(
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.ApplicationCall),
+        InnerTxnBuilder.SetFields([fields provided as arguments]),
+    )
+    ```
+
+    Reference: MakeInnerApplicationCallTxn
+    """
+    return InnerTxn(type_enum=TxnType.ApplicationCall, **locals())
+
+
+def MakeInnerApplicationCallTxn(
+    sender: Optional[Expr] = None,
+    application_id: Optional[Expr] = None,
+    on_completion: Optional[Expr] = None,
+    application_args: Optional[list[Expr]] = None,
+    accounts: Optional[list[Expr]] = None,
+    applications: Optional[list[Expr]] = None,
+    assets: Optional[list[Expr]] = None,
+    approval_program: Optional[Expr] = None,
+    clear_state_program: Optional[Expr] = None,
+    global_num_byte_slices: Optional[Expr] = None,
+    global_num_uints: Optional[Expr] = None,
+    local_num_byte_slices: Optional[Expr] = None,
+    local_num_uints: Optional[Expr] = None,
+    fee: Optional[Expr] = None,
+) -> Expr:
+    """
+    Create an inner application call transaction.
+
+    Args:
+        sender: The sender's address. Leave it empty and it will be autoset to contract's address.
+        application_id: Application ID to be called
+        on_completion: The completion code to be executed after the application is called
+        application_args: Application arguments
+        accounts: Accounts to be used in the application
+        applications: Applications to be used in the application
+        assets: Assets to be used in the application
+        approval_program: Logic executed for every application transaction
+        clear_state_program: Logic executed for application transactions with on-completion set to "clear"
+        global_num_byte_slices: The maximum number of global byte slices to be used in the application
+        global_num_uints: The maximum number of global uints to be used in the application
+        local_num_byte_slices: The maximum number of local byte slices to be used in the application
+        local_num_uints: The maximum number of local uints to be used in the application
+        fee: The fee for the transaction in microAlgos
+
+    For more details about parameters needed for your use-case visit:
+    https://developer.algorand.org/docs/get-details/transactions/transactions/#application-call-transaction
+    """
+    return MakeInnerTxn(type_enum=TxnType.ApplicationCall, **locals())
+
+
+def InnerNoOpTxn(
+    sender: Optional[Expr] = None,
+    application_id: Optional[Expr] = None,
+    application_args: Optional[list[Expr]] = None,
+    accounts: Optional[list[Expr]] = None,
+    applications: Optional[list[Expr]] = None,
+    assets: Optional[list[Expr]] = None,
+    fee: Optional[Expr] = None,
+) -> InnerTxn:
+    """
+    Create an inner no op application call txn and set provided fields.
+    Convenience function for the most common use-case.
+
+    This is equivalent to:
+    ```
+    Seq(
+        InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.ApplicationCall),
+        InnerTxnBuilder.SetField(TxnField.on_completion, OnComplete.NoOp),
+        InnerTxnBuilder.SetFields([fields provided as arguments]),
+    )
+    ```
+
+    Reference: MakeInnerNoOpTxn
+    """
+    return InnerApplicationCallTxn(on_completion=OnComplete.NoOp, **locals())
+
+
+def MakeInnerNoOpTxn(
+    sender: Optional[Expr] = None,
+    application_id: Optional[Expr] = None,
+    application_args: Optional[list[Expr]] = None,
+    accounts: Optional[list[Expr]] = None,
+    applications: Optional[list[Expr]] = None,
+    assets: Optional[list[Expr]] = None,
+    fee: Optional[Expr] = None,
+) -> Expr:
+    """
+    Create an inner no-op application call transaction.
+    Convenience function for the most common type of application call.
+
+    Args:
+        sender: The sender's address. Leave it empty and it will be autoset to contract's address.
+        application_id: Application ID to be called
+        application_args: Application arguments
+        accounts: Accounts to be used in the application
+        applications: Applications to be used in the application
+        assets: Assets to be used in the application
+        fee: The fee for the transaction in microAlgos
+
+    For more details about parameters needed for your use-case visit:
+    https://developer.algorand.org/docs/get-details/transactions/transactions/#application-call-transaction
+    """
+    return MakeInnerApplicationCallTxn(on_completion=OnComplete.NoOp, **locals())
 
 
 def MakeInnerGroupTxn(*txns: InnerTxn) -> Expr:
