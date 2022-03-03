@@ -9,8 +9,8 @@ from .inner_transactions import (
     MakeInnerAssetConfigTxn,
     MakeInnerAssetFreezeTxn,
     MakeInnerAssetTransferTxn,
-    MakeInnerPaymentTxn,
     MakeInnerGroupTxn,
+    MakeInnerPaymentTxn,
     MakeInnerTxn,
 )
 from .lazy import LazyAnd, LazyOr

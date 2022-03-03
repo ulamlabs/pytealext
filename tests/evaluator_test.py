@@ -26,7 +26,7 @@ VERSION = 5
 
 
 @given(
-    i=st.integers(min_value=0, max_value=2 ** 64 - 1),
+    i=st.integers(min_value=0, max_value=2**64 - 1),
 )
 def test_itob_btoi_idempotency(i: int):
     expr = Btoi(Itob(Int(i)))

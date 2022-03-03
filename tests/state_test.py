@@ -1,5 +1,5 @@
-from pyteal import Assert, Bytes, For, Int, Return, ScratchVar, Seq
 import pytest
+from pyteal import Assert, Bytes, For, Int, Return, ScratchVar, Seq
 
 from pytealext import LocalStateArray
 from pytealext.evaluator import EvalContext
@@ -32,6 +32,7 @@ def test_local_state_array():
     stack, slots = compile_and_run(program, context=ctx)
     assert len(stack) == 1
     assert stack[0] == 1
+
 
 @pytest.mark.parametrize("array_2d_class", [LocalStateArray2D, GlobalStateArray2D])
 def test_global_state_array_2D(array_2d_class):

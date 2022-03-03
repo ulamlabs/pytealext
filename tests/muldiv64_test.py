@@ -7,7 +7,7 @@ from pyteal.ast.tmpl import Tmpl
 from pytealext import MulDiv64
 from pytealext.evaluator import INTEGER_SIZE, AssertionFailed, eval_teal
 
-u64_strategy = st.integers(min_value=0, max_value=2 ** 64 - 1)
+u64_strategy = st.integers(min_value=0, max_value=2**64 - 1)
 # TEAL version to use for testing
 VERSION = 5
 
@@ -41,13 +41,13 @@ mulw_divw_template = MulwDivwTemplate()
 
 @settings(deadline=None)
 @given(
-    m1=st.integers(min_value=0, max_value=2 ** 64 - 1),
-    m2=st.integers(min_value=0, max_value=2 ** 64 - 1),
-    d=st.integers(min_value=1, max_value=2 ** 64 - 1),
+    m1=st.integers(min_value=0, max_value=2**64 - 1),
+    m2=st.integers(min_value=0, max_value=2**64 - 1),
+    d=st.integers(min_value=1, max_value=2**64 - 1),
 )
 @example(m1=845440975373315, m2=7362476843216198217, d=6559227162326473294)
 def test_mulw_divw_extra(m1, m2, d):
-    assume(m1 * m2 // d < 2 ** 64)
+    assume(m1 * m2 // d < 2**64)
     mulw_divw_template.check(m1, m2, d)
 
 
@@ -75,9 +75,9 @@ def test_mulw_divw_stacked(ceiling):
 
 def test_mulw_divw_bound_check():
     with pytest.raises(AssertionFailed):
-        mulw_divw_template.check(2 ** 63, 2, 1)
+        mulw_divw_template.check(2**63, 2, 1)
     with pytest.raises(AssertionFailed):
-        mulw_divw_template.check(2 ** 63, 2 ** 63, 2 ** 60)
+        mulw_divw_template.check(2**63, 2**63, 2**60)
 
 
 muldiv_ceil_template = MulDiv64(Tmpl.Int("TMPL_M1"), Tmpl.Int("TMPL_M2"), Tmpl.Int("TMPL_D"), ceiling=True)
@@ -86,9 +86,9 @@ compiled_ceil_template = compileTeal(muldiv_ceil_template, Mode.Application, ver
 
 @settings(deadline=None)
 @given(
-    m1=st.integers(min_value=0, max_value=2 ** 64 - 1),
-    m2=st.integers(min_value=0, max_value=2 ** 64 - 1),
-    d=st.integers(min_value=1, max_value=2 ** 64 - 1),
+    m1=st.integers(min_value=0, max_value=2**64 - 1),
+    m2=st.integers(min_value=0, max_value=2**64 - 1),
+    d=st.integers(min_value=1, max_value=2**64 - 1),
 )
 @example(m1=845440975373315, m2=7362476843216198217, d=6559227162326473294)
 def test_muldiv64_ceiling(m1: int, m2: int, d: int):

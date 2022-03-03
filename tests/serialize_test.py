@@ -8,7 +8,7 @@ from pytealext.serialize import DeserializeIntegers, DeserializeIntegersToSlots,
 
 
 @given(
-    ints=st.lists(st.integers(0, 2 ** 64 - 1), min_size=1, max_size=24),  #
+    ints=st.lists(st.integers(0, 2**64 - 1), min_size=1, max_size=24),  #
     width=st.just(64) | st.just(32) | st.just(16),
 )
 def test_serialize_integers(ints: list[int], width: int):
@@ -25,12 +25,12 @@ def test_serialize_integers(ints: list[int], width: int):
 
 
 @given(
-    ints=st.lists(st.integers(0, 2 ** 64 - 1), min_size=1, max_size=24),  #
+    ints=st.lists(st.integers(0, 2**64 - 1), min_size=1, max_size=24),  #
     width=st.just(64) | st.just(32) | st.just(16),
 )
 def test_serialize_deserialize_idempotency(ints: list[int], width: int):
     # trimm the numbers to the width so that the functions are truly idempotent
-    ints = [i % 2 ** width for i in ints]
+    ints = [i % 2**width for i in ints]
 
     byte = ScratchSlot(255)
     deserialized_integers = [ScratchSlot(i) for i in range(len(ints))]
@@ -49,12 +49,12 @@ def test_serialize_deserialize_idempotency(ints: list[int], width: int):
 
 
 @given(
-    ints=st.lists(st.integers(0, 2 ** 64 - 1), min_size=1, max_size=24),  #
+    ints=st.lists(st.integers(0, 2**64 - 1), min_size=1, max_size=24),  #
     width=st.just(64) | st.just(32) | st.just(16),
 )
 def test_serialize_deserialize_to_slots_idempotency(ints: list[int], width: int):
     # trimm the numbers to the width so that the functions are truly idempotent
-    ints = [i % 2 ** width for i in ints]
+    ints = [i % 2**width for i in ints]
 
     byte = ScratchSlot(255)
     deserialized_integers = [ScratchSlot(i) for i in range(len(ints))]

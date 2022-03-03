@@ -3,7 +3,7 @@ from typing import IO
 
 from algosdk.future.transaction import ApplicationCallTxn
 
-INTEGER_SIZE = 2 ** 64
+INTEGER_SIZE = 2**64
 
 
 class Panic(Exception):
@@ -66,7 +66,10 @@ def split128(val: int):
 
 
 def eval_teal(
-    lines: list[str], return_stack=True, context: EvalContext or None = None, debug: IO or None = None
+    lines: list[str],
+    return_stack=True,
+    context: EvalContext or None = None,
+    debug: IO or None = None,
 ) -> tuple[list, list]:
     """
     Simulate a basic teal program.
@@ -187,7 +190,7 @@ def eval_teal(
             a = stack.pop()
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
-            stack.append(a << b % 2 ** 64)
+            stack.append(a << b % 2**64)
         elif op == "shr":
             b = stack.pop()
             a = stack.pop()
@@ -452,7 +455,10 @@ def eval_teal(
         elif op == "int":
             x = int(args[0])
             if x < 0 or x >= INTEGER_SIZE:
-                raise Panic(f"int expects non-negative integer smaller than {INTEGER_SIZE} (actual={x})", current_line)
+                raise Panic(
+                    f"int expects non-negative integer smaller than {INTEGER_SIZE} (actual={x})",
+                    current_line,
+                )
             stack.append(x)
         elif op == "bnz":
             cond = stack.pop()
