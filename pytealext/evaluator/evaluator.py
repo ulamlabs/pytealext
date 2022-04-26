@@ -96,6 +96,8 @@ def eval_teal(
     }
 
     current_line = 0
+    comeback_line = 0
+
     while current_line < len(lines):
         line = lines[current_line]
         current_line += 1
@@ -202,6 +204,12 @@ def eval_teal(
             if not isinstance(a, int):
                 raise Panic("Invalid type", current_line)
             stack.append(isqrt(a))
+        elif op == "exp":
+            a = stack.pop()
+            b = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int):
+                raise Panic("Invalid type", current_line)
+            stack.append(a ** b)
         elif op == "assert":
             a = stack.pop()
             if not isinstance(a, int):
@@ -313,6 +321,83 @@ def eval_teal(
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             stack.append(int(bool(a != b)))
+        elif op == "b+":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append((int.from_bytes(a, "big") + int.from_bytes(b, "big")).to_bytes(8, "big"))
+        elif op == "b-":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append((int.from_bytes(a, "big") - int.from_bytes(b, "big")).to_bytes(8, "big"))
+        elif op == "b/":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append((int.from_bytes(a, "big") // int.from_bytes(b, "big")).to_bytes(8, "big"))
+        elif op == "b*":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append((int.from_bytes(a, "big") * int.from_bytes(b, "big")).to_bytes(8, "big"))
+        elif op == "b==":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(int.from_bytes(a, "big") == int.from_bytes(b, "big"))))
+        elif op == "b<":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(int.from_bytes(a, "big") < int.from_bytes(b, "big"))))
+        elif op == "b<=":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(int.from_bytes(a, "big") <= int.from_bytes(b, "big"))))
+        elif op == "b>":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(int.from_bytes(a, "big") > int.from_bytes(b, "big"))))
+        elif op == "b>=":
+            a = stack.pop()
+            b = stack.pop()
+            if type(a) is not type(b):
+                raise Panic("Type mismatch", current_line)
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(int(bool(int.from_bytes(a, "big") >= int.from_bytes(b, "big"))))
+        elif op == "bsqrt":
+            a = stack.pop()
+            if not isinstance(a, bytes):
+                raise Panic("Invalid type", current_line)
+            stack.append(isqrt(int.from_bytes(a, "big")).to_bytes(8, "big"))
         elif op == "select":
             c = stack.pop()
             b = stack.pop()
@@ -470,6 +555,11 @@ def eval_teal(
                 current_line = branch_targets[args[0]]
         elif op == "b":
             current_line = branch_targets[args[0]]
+        elif op == "callsub":
+            comeback_line = current_line
+            current_line = branch_targets[args[0]]
+        elif op == "retsub":
+            current_line = comeback_line
         elif op == "cover":
             nr = int(args[0])
             top = stack.pop()
