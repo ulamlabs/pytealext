@@ -97,6 +97,7 @@ def eval_teal(
         tuple of (stack, slots)
     """
     stack = []  # type: list[int or str]
+    call_stack = []  # type: list[int]
     slots = [0 for _ in range(256)]
     branch_targets = {
         line[:-1]: nr  # strip trailing ":" from key, ex. b11: -> b11
@@ -622,10 +623,10 @@ def eval_teal(
         elif op == "b":
             current_line = branch_targets[args[0]]
         elif op == "callsub":
-            stack.append(current_line)
+            call_stack.append(current_line)
             current_line = branch_targets[args[0]]
         elif op == "retsub":
-            current_line = stack.pop()
+            current_line = call_stack.pop()
         elif op == "cover":
             nr = int(args[0])
             top = stack.pop()
