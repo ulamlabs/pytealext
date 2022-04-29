@@ -1,5 +1,5 @@
 import pytest
-from hypothesis import given
+from hypothesis import given, assume
 from hypothesis import strategies as st
 from pyteal import (
     And,
@@ -16,6 +16,8 @@ from pyteal import (
     Mode,
     Pop,
     Seq,
+    Exp,
+    Eq,
     compileTeal,
 )
 
@@ -175,3 +177,38 @@ def test_local_state():
 
     for k, v in mapping.items():
         assert ctx.local_state[k] == v
+
+
+@given(
+    i=st.integers(min_value=1, max_value=2 ** 10),
+    j=st.integers(min_value=1, max_value=2 ** 10),
+)
+def test_exp(i: int, j: int):
+    assume(i ** j <= 2 ** 64 - 1)
+    i_int = Int(i)
+    j_int = Int(j)
+
+    expected = Int(i ** j)
+
+    expr = Eq(Exp(i_int, j_int), expected)
+    expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
+
+    stack, _ = eval_teal(expr_asm.splitlines())
+
+    assert len(stack) == 1
+    assert stack[0] == 1
+
+
+@given(
+    i=st.integers(min_value=2 ** 62, max_value=2 ** 64 - 1),
+    j=st.integers(min_value=2 ** 5, max_value=2 ** 8),
+)
+def test_exp_fails_for_overflow(i: int, j: int):
+    i_int = Int(i)
+    j_int = Int(j)
+
+    expr = Eq(Exp(i_int, j_int), Int(1))
+    expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
+
+    with pytest.raises(Panic, match="Overflow"):
+        eval_teal(expr_asm.splitlines())

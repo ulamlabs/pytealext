@@ -214,8 +214,8 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             stack.append(isqrt(a))
         elif op == "exp":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
             if a ** b > INTEGER_SIZE:
@@ -333,8 +333,8 @@ def eval_teal(
                 raise Panic("Type mismatch", current_line)
             stack.append(int(bool(a != b)))
         elif op == "b+":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
@@ -379,8 +379,8 @@ def eval_teal(
                 )
             )
         elif op == "b*":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
@@ -393,8 +393,8 @@ def eval_teal(
                 )
             )
         elif op == "b==":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
