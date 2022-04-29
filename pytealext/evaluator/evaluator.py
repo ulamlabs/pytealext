@@ -220,6 +220,8 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if a ** b > INTEGER_SIZE:
                 raise Panic("Overflow", current_line)
+            if a == 0 and b == 0:
+                raise Panic("Invalid input", current_line)
             stack.append(a ** b)
         elif op == "assert":
             a = stack.pop()

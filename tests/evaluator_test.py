@@ -180,11 +180,12 @@ def test_local_state():
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 10),
-    j=st.integers(min_value=1, max_value=2 ** 10),
+    i=st.integers(min_value=0, max_value=2 ** 10),
+    j=st.integers(min_value=0, max_value=2 ** 10),
 )
 def test_exp(i: int, j: int):
     assume(i ** j <= 2 ** 64 - 1)
+    assume(not (i == 0 and j == 0))
     i_int = Int(i)
     j_int = Int(j)
 
@@ -198,6 +199,15 @@ def test_exp(i: int, j: int):
     assert len(stack) == 1
     assert stack[0] == 1
 
+def test_exp_fails_for_zeroes():
+    i_int = Int(0)
+    j_int = Int(0)
+
+    expr = Eq(Exp(i_int, j_int), Int(1))
+    expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
+
+    with pytest.raises(Panic, match="Invalid input"):
+        eval_teal(expr_asm.splitlines())
 
 @given(
     i=st.integers(min_value=2 ** 62, max_value=2 ** 64 - 1),
