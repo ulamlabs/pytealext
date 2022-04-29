@@ -347,8 +347,8 @@ def eval_teal(
                 )
             )
         elif op == "b-":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
@@ -363,14 +363,16 @@ def eval_teal(
                 )
             )
         elif op == "b/":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
+            if int.from_bytes(b, "big") == 0:
+                raise Panic("Division by 0", current_line)
             stack.append(
                 int_to_trimmed_bytes(
                     int.from_bytes(a, "big") // int.from_bytes(b, "big")
@@ -403,8 +405,8 @@ def eval_teal(
                 int(bool(int.from_bytes(a, "big") == int.from_bytes(b, "big")))
             )
         elif op == "b<":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
@@ -413,8 +415,8 @@ def eval_teal(
                 raise Panic("Bytes overflow", current_line)
             stack.append(int(bool(int.from_bytes(a, "big") < int.from_bytes(b, "big"))))
         elif op == "b<=":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
@@ -425,8 +427,8 @@ def eval_teal(
                 int(bool(int.from_bytes(a, "big") <= int.from_bytes(b, "big")))
             )
         elif op == "b>":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
@@ -435,8 +437,8 @@ def eval_teal(
                 raise Panic("Bytes overflow", current_line)
             stack.append(int(bool(int.from_bytes(a, "big") > int.from_bytes(b, "big"))))
         elif op == "b>=":
-            a = stack.pop()
             b = stack.pop()
+            a = stack.pop()
             if type(a) is not type(b):
                 raise Panic("Type mismatch", current_line)
             if not isinstance(a, bytes) or not isinstance(b, bytes):
