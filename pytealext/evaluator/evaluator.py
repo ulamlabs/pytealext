@@ -102,7 +102,7 @@ def eval_teal(
     branch_targets = {
         line[:-1]: nr  # strip trailing ":" from key, ex. b11: -> b11
         for nr, line in enumerate(lines)
-        if line[-1] == ":"
+        if line and line[-1] == ":"
     }
 
     current_line = 0
