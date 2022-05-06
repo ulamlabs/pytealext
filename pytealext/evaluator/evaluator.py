@@ -116,6 +116,8 @@ def eval_teal(
 
         if line.startswith("#"):
             continue
+        if not line:
+            continue
         if line[-1] == ":":
             continue
 
@@ -646,5 +648,5 @@ def eval_teal(
             x = slots[i]
             stack.append(x)
         else:
-            raise Exception(f"Operation '{line}' is not supported by the simulator")
+            raise Exception(f"Operation '{line}'(line={current_line}) is not supported by the simulator")
     return stack, slots
