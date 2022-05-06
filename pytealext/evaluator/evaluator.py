@@ -129,6 +129,8 @@ def eval_teal(
         line_s = line.split()
         op = line_s[0]
         args = line_s[1:]
+        if op == "err":
+            raise Panic("Encountered error opcode", current_line)
         if op == "dup":
             x = stack[-1]
             stack.append(x)
