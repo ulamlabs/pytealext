@@ -68,3 +68,23 @@ class Max(CompareAndSelect):
     def __init__(self, lhs: Expr, rhs: Expr):
         # lhs < rhs => value of rhs is returned
         super().__init__(lhs, rhs, Op.lt, TealType.uint64)
+
+
+class BytesMin(CompareAndSelect):
+    """
+    Expression calculating the minimum of two big integers encoded as bytes.
+    """
+
+    def __init__(self, lhs: Expr, rhs: Expr):
+        # lhs > rhs => value of rhs is returned
+        super().__init__(lhs, rhs, Op.b_gt, TealType.bytes)
+
+
+class BytesMax(CompareAndSelect):
+    """
+    Expression calculating the maximum of two big integers encoded as bytes.
+    """
+
+    def __init__(self, lhs: Expr, rhs: Expr):
+        # lhs < rhs => value of rhs is returned
+        super().__init__(lhs, rhs, Op.b_lt, TealType.bytes)

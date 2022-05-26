@@ -1,19 +1,19 @@
 from . import evaluator
 from .assemble import assemble_steps
-from .cas import CompareAndSelect, Max, Min
+from .cas import BytesMax, BytesMin, CompareAndSelect, Max, Min
 from .inner_transactions import (
     InnerApplicationCallTxn,
-    InnerNoOpTxn,
     InnerAssetConfigTxn,
     InnerAssetFreezeTxn,
     InnerAssetTransferTxn,
+    InnerNoOpTxn,
     InnerPaymentTxn,
     MakeInnerApplicationCallTxn,
-    MakeInnerNoOpTxn,
     MakeInnerAssetConfigTxn,
     MakeInnerAssetFreezeTxn,
     MakeInnerAssetTransferTxn,
     MakeInnerGroupTxn,
+    MakeInnerNoOpTxn,
     MakeInnerPaymentTxn,
     MakeInnerTxn,
 )
@@ -52,6 +52,8 @@ __all__ = [
     "MulDiv64",
     "Min",
     "Max",
+    "BytesMin",
+    "BytesMax",
     "LazyAnd",
     "LazyOr",
     "GlobalState",
