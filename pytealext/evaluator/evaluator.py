@@ -538,6 +538,11 @@ def eval_teal(
                 raise Panic("log size limit exceeded", current_line)
             if len(context.log) > MaxLogCalls:
                 raise Panic("log calls limit exceeded", current_line)
+        elif op == "len":
+            val = stack.pop()
+            if not isinstance(val, bytes):
+                raise Panic("len requires bytes value", current_line)
+            stack.append(len(val))
         elif op == "itob":
             val = stack.pop()
             if not isinstance(val, int):
