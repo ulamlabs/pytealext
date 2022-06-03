@@ -12,6 +12,7 @@ def get_arg_names(f):
     fas = getfullargspec(f)
     return fas.args  # list of parameter names
 
+
 def get_arg_annotations(f) -> dict[str, str]:
     fas = getfullargspec(f)
     return fas.annotations  # dict of parameter names to annotations
@@ -126,8 +127,8 @@ def test_MakeInnerAssetConfigTxn():
 def test_InnerTxns(inner_txn_function, type_enum):
     argspec = getfullargspec(inner_txn_function)
 
-    for param in argspec.args: # for each function argument
-        if "list" in str(argspec.annotations[param]): # if it's a list
+    for param in argspec.args:  # for each function argument
+        if "list" in str(argspec.annotations[param]):  # if it's a list
             ast_actual = inner_txn_function(**{param: [App.localGet(Int(0), Bytes("test"))]})
 
             ast_expected = Seq(
@@ -199,8 +200,9 @@ def test_makeInnerGroupTxn():
 def test_example_gtxn_compiles():
     """Test that example gtxn from docs compiles"""
 
-    from pyteal import AppParam, MethodSignature, compileTeal, Approve
-    from pytealext import MakeInnerGroupTxn, InnerNoOpTxn, InnerAssetTransferTxn
+    from pyteal import AppParam, Approve, MethodSignature, compileTeal
+
+    from pytealext import InnerAssetTransferTxn, InnerNoOpTxn, MakeInnerGroupTxn
 
     app_to_call = Int(12345)
     amount_to_deposit = Int(100)
@@ -221,15 +223,15 @@ def test_example_gtxn_compiles():
                 asset_receiver=app_address.value(),
                 asset_amount=amount_to_deposit,
                 xfer_asset=asset_id,
-                fee=Int(0), # must be pooled
+                fee=Int(0),  # must be pooled
             ),
             InnerNoOpTxn(
                 application_id=app_to_call,
                 application_args=[method, Bytes("Hello")],
-                fee=Int(0), # must be pooled
-            )
+                fee=Int(0),  # must be pooled
+            ),
         ),
-        Approve()
+        Approve(),
     )
 
     compileTeal(deposit_and_call, Mode.Application, version=6)

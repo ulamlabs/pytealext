@@ -2,35 +2,31 @@ from math import isqrt
 from typing import Callable
 
 import pytest
-from hypothesis import given, assume
+from hypothesis import assume, given
 from hypothesis import strategies as st
 from pyteal import (
-    compileTeal,
-    Mode,
-    BytesAdd,
-    BytesMinus,
-    BytesDiv,
-    BytesMul,
-    BytesEq,
     Bytes,
-    Itob,
-    Int,
+    BytesAdd,
+    BytesDiv,
+    BytesEq,
+    BytesMinus,
+    BytesMul,
     BytesSqrt,
+    Int,
+    Itob,
+    Len,
+    Mode,
+    compileTeal,
 )
 
-from pytealext.evaluator.evaluator import (
-    int_to_trimmed_bytes,
-    Panic,
-    eval_teal,
-    EvalContext,
-)
+from pytealext.evaluator.evaluator import EvalContext, Panic, eval_teal, int_to_trimmed_bytes
 
 VERSION = 6
 
 
 @pytest.mark.parametrize("function", (BytesAdd, BytesMinus, BytesDiv, BytesMul))
 def test_ops_fail_for_overflows(function: Callable):
-    large_bytes = Bytes(int_to_trimmed_bytes(2 ** 512))
+    large_bytes = Bytes(int_to_trimmed_bytes(2**512))
 
     expr = compileTeal(
         BytesEq(function(large_bytes, large_bytes), Itob(Int(1))),
@@ -43,7 +39,7 @@ def test_ops_fail_for_overflows(function: Callable):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
 )
 def test_trimming_bytes(i: int):
     i_bytes = int_to_trimmed_bytes(i)
@@ -53,8 +49,8 @@ def test_trimming_bytes(i: int):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
-    j=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
+    j=st.integers(min_value=1, max_value=2**255),
 )
 def test_bytes_add(i: int, j: int):
     i_bytes = Bytes(int_to_trimmed_bytes(i))
@@ -72,8 +68,8 @@ def test_bytes_add(i: int, j: int):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
-    j=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
+    j=st.integers(min_value=1, max_value=2**255),
 )
 def test_bytes_minus(i: int, j: int):
     assume(i > j)
@@ -92,8 +88,8 @@ def test_bytes_minus(i: int, j: int):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
-    j=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
+    j=st.integers(min_value=1, max_value=2**255),
 )
 def test_bytes_minus_fails_for_underflow(i: int, j: int):
     assume(i < j)
@@ -108,8 +104,8 @@ def test_bytes_minus_fails_for_underflow(i: int, j: int):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
-    j=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
+    j=st.integers(min_value=1, max_value=2**255),
 )
 def test_bytes_div(i: int, j: int):
     assume(i > j)
@@ -140,8 +136,8 @@ def test_bytes_div_fails_for_illegal_division(i: int):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
-    j=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
+    j=st.integers(min_value=1, max_value=2**255),
 )
 def test_bytes_mul(i: int, j: int):
     i_bytes = Bytes(int_to_trimmed_bytes(i))
@@ -159,7 +155,7 @@ def test_bytes_mul(i: int, j: int):
 
 
 @given(
-    i=st.integers(min_value=1, max_value=2 ** 255),
+    i=st.integers(min_value=1, max_value=2**255),
 )
 def test_bytes_sqrt(i: int):
     i_bytes = Bytes(int_to_trimmed_bytes(i))
@@ -173,3 +169,12 @@ def test_bytes_sqrt(i: int):
 
     assert len(stack) == 1
     assert stack[0] == 1
+
+
+def test_bytes_len():
+    expr = Len(Bytes("abba")) == Int(4)
+    expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
+
+    stack, _ = eval_teal(expr_asm.splitlines())
+
+    assert stack == [1]
