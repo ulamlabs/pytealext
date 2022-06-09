@@ -190,7 +190,7 @@ def test_bytes_zero():
             BytesZero(Int(1)),
             Bytes(b"\x66"),
             BytesZero(Int(3)),
-        )
+        ),
     )
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 

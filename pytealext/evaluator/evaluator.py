@@ -3,7 +3,7 @@ from typing import IO
 
 from algosdk.future.transaction import ApplicationCallTxn
 
-INTEGER_SIZE = 2 ** 64
+INTEGER_SIZE = 2**64
 
 
 def int_to_trimmed_bytes(value: int) -> bytes:
@@ -57,12 +57,8 @@ class EvalContext:
             local_state: The local state of the user interacting with the application
             txn: The transaction that is being evaluated
         """
-        self.global_state = (
-            global_state if global_state is not None else {}
-        )  # type: dict[bytes, int or bytes]
-        self.local_state = (
-            local_state if local_state is not None else {}
-        )  # type: dict[bytes, int or bytes]
+        self.global_state = global_state if global_state is not None else {}  # type: dict[bytes, int or bytes]
+        self.local_state = local_state if local_state is not None else {}  # type: dict[bytes, int or bytes]
         self.txn = txn
         self.log = []  # type: list[bytes]
 
@@ -206,7 +202,7 @@ def eval_teal(
             a = stack.pop()
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
-            stack.append(a << b % 2 ** 64)
+            stack.append(a << b % 2**64)
         elif op == "shr":
             b = stack.pop()
             a = stack.pop()
@@ -223,11 +219,11 @@ def eval_teal(
             a = stack.pop()
             if not isinstance(a, int) or not isinstance(b, int):
                 raise Panic("Invalid type", current_line)
-            if a ** b > INTEGER_SIZE:
+            if a**b > INTEGER_SIZE:
                 raise Panic("Overflow", current_line)
             if a == 0 and b == 0:
                 raise Panic("Invalid input", current_line)
-            stack.append(a ** b)
+            stack.append(a**b)
         elif op == "assert":
             a = stack.pop()
             if not isinstance(a, int):
@@ -348,11 +344,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
-            stack.append(
-                int_to_trimmed_bytes(
-                    int.from_bytes(a, "big") + int.from_bytes(b, "big")
-                )
-            )
+            stack.append(int_to_trimmed_bytes(int.from_bytes(a, "big") + int.from_bytes(b, "big")))
         elif op == "b-":
             b = stack.pop()
             a = stack.pop()
@@ -364,11 +356,7 @@ def eval_teal(
                 raise Panic("Bytes overflow", current_line)
             if int.from_bytes(a, "big") - int.from_bytes(b, "big") < 0:
                 raise Panic("Underflow", current_line)
-            stack.append(
-                int_to_trimmed_bytes(
-                    int.from_bytes(a, "big") - int.from_bytes(b, "big")
-                )
-            )
+            stack.append(int_to_trimmed_bytes(int.from_bytes(a, "big") - int.from_bytes(b, "big")))
         elif op == "b/":
             b = stack.pop()
             a = stack.pop()
@@ -380,11 +368,7 @@ def eval_teal(
                 raise Panic("Bytes overflow", current_line)
             if int.from_bytes(b, "big") == 0:
                 raise Panic("Division by 0", current_line)
-            stack.append(
-                int_to_trimmed_bytes(
-                    int.from_bytes(a, "big") // int.from_bytes(b, "big")
-                )
-            )
+            stack.append(int_to_trimmed_bytes(int.from_bytes(a, "big") // int.from_bytes(b, "big")))
         elif op == "b*":
             b = stack.pop()
             a = stack.pop()
@@ -394,11 +378,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
-            stack.append(
-                int_to_trimmed_bytes(
-                    int.from_bytes(a, "big") * int.from_bytes(b, "big")
-                )
-            )
+            stack.append(int_to_trimmed_bytes(int.from_bytes(a, "big") * int.from_bytes(b, "big")))
         elif op == "b==":
             b = stack.pop()
             a = stack.pop()
@@ -408,9 +388,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
-            stack.append(
-                int(bool(int.from_bytes(a, "big") == int.from_bytes(b, "big")))
-            )
+            stack.append(int(bool(int.from_bytes(a, "big") == int.from_bytes(b, "big"))))
         elif op == "b!=":
             b = stack.pop()
             a = stack.pop()
@@ -420,9 +398,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
-            stack.append(
-                int(bool(int.from_bytes(a, "big") != int.from_bytes(b, "big")))
-            )
+            stack.append(int(bool(int.from_bytes(a, "big") != int.from_bytes(b, "big"))))
         elif op == "b<":
             b = stack.pop()
             a = stack.pop()
@@ -442,9 +418,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
-            stack.append(
-                int(bool(int.from_bytes(a, "big") <= int.from_bytes(b, "big")))
-            )
+            stack.append(int(bool(int.from_bytes(a, "big") <= int.from_bytes(b, "big"))))
         elif op == "b>":
             b = stack.pop()
             a = stack.pop()
@@ -464,9 +438,7 @@ def eval_teal(
                 raise Panic("Invalid type", current_line)
             if len(a) > 64 or len(b) > 64:
                 raise Panic("Bytes overflow", current_line)
-            stack.append(
-                int(bool(int.from_bytes(a, "big") >= int.from_bytes(b, "big")))
-            )
+            stack.append(int(bool(int.from_bytes(a, "big") >= int.from_bytes(b, "big"))))
         elif op == "bsqrt":
             a = stack.pop()
             if not isinstance(a, bytes):
@@ -577,11 +549,7 @@ def eval_teal(
             c = stack.pop()
             b = stack.pop()
             a = stack.pop()
-            if (
-                not isinstance(a, bytes)
-                or not isinstance(b, int)
-                or not isinstance(c, int)
-            ):
+            if not isinstance(a, bytes) or not isinstance(b, int) or not isinstance(c, int):
                 raise Panic("Invalid type", current_line)
             stack.append(a[b : b + c])
         elif op == "extract":
@@ -622,9 +590,7 @@ def eval_teal(
             if args[0] == "ApplicationArgs":
                 arg_index = int(args[1])
                 if arg_index > len(context.txn.app_args):
-                    raise Panic(
-                        "txna ApplicationArgs index out of bounds", current_line
-                    )
+                    raise Panic("txna ApplicationArgs index out of bounds", current_line)
                 stack.append(context.txn.app_args[arg_index])
             else:
                 raise Exception("Unsupported txna expression")

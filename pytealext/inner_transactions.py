@@ -1,6 +1,17 @@
 from typing import Optional
 
-from pyteal import CompileOptions, Expr, InnerTxnBuilder, OnComplete, Seq, TealBlock, TealSimpleBlock, TealType, TxnField, TxnType
+from pyteal import (
+    CompileOptions,
+    Expr,
+    InnerTxnBuilder,
+    OnComplete,
+    Seq,
+    TealBlock,
+    TealSimpleBlock,
+    TealType,
+    TxnField,
+    TxnType,
+)
 
 
 class InnerTxn(Expr):
