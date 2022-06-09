@@ -12,6 +12,9 @@ from pyteal import (
     BytesMinus,
     BytesMul,
     BytesSqrt,
+    BytesZero,
+    Concat,
+    Eq,
     Int,
     Itob,
     Len,
@@ -173,6 +176,22 @@ def test_bytes_sqrt(i: int):
 
 def test_bytes_len():
     expr = Len(Bytes("abba")) == Int(4)
+    expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
+
+    stack, _ = eval_teal(expr_asm.splitlines())
+
+    assert stack == [1]
+
+
+def test_bytes_zero():
+    expr = Eq(
+        Bytes(b"\x00\x66\x00\x00\x00"),
+        Concat(
+            BytesZero(Int(1)),
+            Bytes(b"\x66"),
+            BytesZero(Int(3)),
+        )
+    )
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
     stack, _ = eval_teal(expr_asm.splitlines())

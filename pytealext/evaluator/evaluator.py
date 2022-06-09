@@ -33,6 +33,7 @@ class AssertionFailed(Panic):
 
 MaxLogCalls = 32
 MaxLogSize = 1024
+MaxStringSize = 4096
 
 MaxLocalStateSize = 16
 MaxGlobalStateSize = 64
@@ -473,6 +474,13 @@ def eval_teal(
             if len(a) > 64:
                 raise Panic("Bytes overflow", current_line)
             stack.append(int_to_trimmed_bytes(isqrt(int.from_bytes(a, "big"))))
+        elif op == "bzero":
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("Invalid type", current_line)
+            if a > MaxStringSize:
+                raise Panic("Produced byte array would be too long", current_line)
+            stack.append(b"\x00" * a)
         elif op == "select":
             c = stack.pop()
             b = stack.pop()
@@ -562,6 +570,8 @@ def eval_teal(
             a = stack.pop()
             if not isinstance(a, bytes) or not isinstance(b, bytes):
                 raise Panic("Invalid type", current_line)
+            if len(a) + len(b) > MaxStringSize:
+                raise Panic("Produced byte array is too long", current_line)
             stack.append(a + b)
         elif op == "extract3":
             c = stack.pop()
