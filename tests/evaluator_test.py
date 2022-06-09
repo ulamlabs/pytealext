@@ -181,7 +181,7 @@ def test_local_state():
 
 @given(
     i=st.integers(min_value=0, max_value=2**10),
-    j=st.integers(min_value=0, max_value=2**10),
+    j=st.integers(min_value=0, max_value=64),
 )
 def test_exp(i: int, j: int):
     assume(i**j <= 2**64 - 1)
