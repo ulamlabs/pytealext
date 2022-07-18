@@ -1,6 +1,6 @@
 from typing import Union
 
-from pyteal import App, Bytes, Concat, Expr, Int, Itob, MaybeValue, TealType
+from pyteal import App, Bytes, Concat, Expr, Int, Itob, MaybeValue, Seq, TealType
 from pyteal.types import require_type
 
 
@@ -30,6 +30,12 @@ class State:
     def get(self) -> App:
         """
         Get a value from a state schema
+        """
+        raise NotImplementedError
+
+    def exists(self) -> App:
+        """
+        Check if the value with this key exists.
         """
         raise NotImplementedError
 
@@ -66,6 +72,10 @@ class LocalState(State):
     def get(self) -> App:
         return App.localGet(Int(0), self._name)
 
+    def exists(self) -> Expr:
+        mb = App.localGetEx(Int(0), Int(0), self._name)
+        return Seq(mb, mb.hasValue())
+
 
 class GlobalState(State):
     """
@@ -78,6 +88,10 @@ class GlobalState(State):
 
     def get(self) -> App:
         return App.globalGet(self._name)
+
+    def exists(self) -> Expr:
+        mb = App.globalGetEx(Int(0), self._name)
+        return Seq(mb, mb.hasValue())
 
 
 def get_global_state_ex(foreign_id: int, key: str) -> MaybeValue:
