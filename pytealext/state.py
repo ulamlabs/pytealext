@@ -35,7 +35,7 @@ class State:
 
     def exists(self) -> App:
         """
-        Check if the value with this key exists.
+        Check if the key of this state variable is present in current app's schema.
         """
         raise NotImplementedError
 
