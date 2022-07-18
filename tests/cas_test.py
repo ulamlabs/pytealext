@@ -13,7 +13,11 @@ from tests.helpers import compile_and_run
 def test_bytes_min_max(lhs: int, rhs: int):
     mini = ScratchVar(slotId=1)
     maxi = ScratchVar(slotId=2)
-    ast = Seq(mini.store(BytesMin(Bytes(lhs), Bytes(rhs))), maxi.store(BytesMax(Bytes(lhs), Bytes(rhs))), Int(1))
+    ast = Seq(
+        mini.store(BytesMin(Bytes(lhs), Bytes(rhs))),
+        maxi.store(BytesMax(Bytes(lhs), Bytes(rhs))),
+        Int(1),
+    )
 
     stack, slots = compile_and_run(ast)
 

@@ -1,7 +1,19 @@
 from inspect import getfullargspec
 
 import pytest
-from pyteal import Addr, App, Bytes, CompileOptions, Global, Int, Mode, TealBlock, TealComponent, TxnField, TxnType
+from pyteal import (
+    Addr,
+    App,
+    Bytes,
+    CompileOptions,
+    Global,
+    Int,
+    Mode,
+    TealBlock,
+    TealComponent,
+    TxnField,
+    TxnType,
+)
 
 from pytealext.inner_transactions import *  # pylint: disable=unused-wildcard-import
 
@@ -182,7 +194,8 @@ def test_makeInnerGroupTxn():
         InnerTxnBuilder.Next(),
         InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetTransfer),
         InnerTxnBuilder.SetField(
-            TxnField.asset_receiver, Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE")
+            TxnField.asset_receiver,
+            Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE"),
         ),
         InnerTxnBuilder.Next(),
         InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.ApplicationCall),
