@@ -109,13 +109,14 @@ class StateArray:
     Wrapper for state access which utilizes multiple slots
     """
 
-    def __init__(self, prefix: Union[str, Expr]):
+    def __init__(self, prefix: Union[str, Expr], type_hint: TealType = TealType.anytype):
         """
         Args:
             prefix: a key prefix in the global state, if it's a string it will be converted to Bytes.
             Prefix should be unique to avoid naming conflicts.
         """
         self._prefix = prefix
+        self.type_hint = type_hint
 
     def key_at_index(self, index: Union[int, Expr]) -> Expr:
         """
@@ -144,7 +145,7 @@ class LocalStateArray(StateArray):
     """
 
     def __getitem__(self, index: Union[int, Expr]):
-        return LocalState(self.key_at_index(index))
+        return LocalState(self.key_at_index(index), self.type_hint)
 
 
 class LocalStateArray2D(StateArray):
@@ -154,7 +155,7 @@ class LocalStateArray2D(StateArray):
 
     def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
         length, width = indices
-        return LocalStateArray(self.key_at_index(length))[width]
+        return LocalStateArray(self.key_at_index(length), self.type_hint)[width]
 
 
 class GlobalStateArray(StateArray):
@@ -163,7 +164,7 @@ class GlobalStateArray(StateArray):
     """
 
     def __getitem__(self, index: Union[int, Expr]):
-        return GlobalState(self.key_at_index(index))
+        return GlobalState(self.key_at_index(index), self.type_hint)
 
 
 class GlobalStateArray2D(StateArray):
@@ -173,4 +174,4 @@ class GlobalStateArray2D(StateArray):
 
     def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
         length, width = indices
-        return GlobalStateArray(self.key_at_index(length))[width]
+        return GlobalStateArray(self.key_at_index(length), self.type_hint)[width]
