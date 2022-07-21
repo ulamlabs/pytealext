@@ -484,7 +484,7 @@ def eval_teal(
             if not isinstance(key, bytes):
                 raise Panic("app_global_get_ex key must be a bytes value", current_line)
             val = context.global_state.get(key, 0)
-            exists = key in context.global_state
+            exists = int(key in context.global_state)
             stack.append(val)
             stack.append(exists)
         elif op == "app_global_put":
@@ -515,7 +515,7 @@ def eval_teal(
             if not isinstance(key, bytes):
                 raise Panic("app_local_get_ex key must be a bytes value", current_line)
             val = context.local_state.get(key, 0)
-            exists = key in context.local_state
+            exists = int(key in context.local_state)
             stack.append(val)
             stack.append(exists)
         elif op == "app_local_put":
