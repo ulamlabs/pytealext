@@ -474,6 +474,19 @@ def eval_teal(
                 raise Exception("app_global_get requires execution environment context")
             val = context.global_state.get(key, 0)
             stack.append(val)
+        elif op == "app_global_get_ex":
+            key = stack.pop()
+            app = stack.pop()
+            if context is None:
+                raise Exception("app_global_get_ex requires execution environment context")
+            if app != 0:
+                raise Exception("Accessing other app's global state is unsupported")
+            if not isinstance(key, bytes):
+                raise Panic("app_global_get_ex key must be a bytes value", current_line)
+            val = context.global_state.get(key, 0)
+            exists = key in context.global_state
+            stack.append(val)
+            stack.append(exists)
         elif op == "app_global_put":
             b = stack.pop()
             a = stack.pop()
@@ -486,13 +499,25 @@ def eval_teal(
             b = stack.pop()
             a = stack.pop()
             if a != 0:
-                raise Panic(
+                raise Exception(
                     "app_local_get is only supported with 0 as the account parameter",
                     current_line,
                 )
             if not isinstance(b, bytes):
                 raise Panic("app_local_get key must be a bytes value", current_line)
             stack.append(context.local_state.get(b, 0))
+        elif op == "app_local_get_ex":
+            key = stack.pop()
+            app = stack.pop()
+            account = stack.pop()
+            if app != 0 or account != 0:
+                raise Exception("app_local_get_ex is only supported with 0" " as the account and application parameter")
+            if not isinstance(key, bytes):
+                raise Panic("app_local_get_ex key must be a bytes value", current_line)
+            val = context.local_state.get(key, 0)
+            exists = key in context.local_state
+            stack.append(val)
+            stack.append(exists)
         elif op == "app_local_put":
             c = stack.pop()
             b = stack.pop()

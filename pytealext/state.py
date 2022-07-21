@@ -73,8 +73,8 @@ class LocalState(State):
         return App.localGet(Int(0), self._name)
 
     def exists(self) -> Expr:
-        mb = App.localGetEx(Int(0), Int(0), self._name)
-        return Seq(mb, mb.hasValue())
+        ex = App.localGetEx(Int(0), Int(0), self._name)
+        return Seq(ex, ex.hasValue())
 
 
 class GlobalState(State):
@@ -90,8 +90,8 @@ class GlobalState(State):
         return App.globalGet(self._name)
 
     def exists(self) -> Expr:
-        mb = App.globalGetEx(Int(0), self._name)
-        return Seq(mb, mb.hasValue())
+        ex = App.globalGetEx(Int(0), self._name)
+        return Seq(ex, ex.hasValue())
 
 
 def get_global_state_ex(foreign_id: int, key: str) -> MaybeValue:
