@@ -1,3 +1,5 @@
+from typing import Sequence
+
 from pyteal import CompileOptions, Expr, If, Int, TealBlock, TealInputError, TealSimpleBlock
 from pyteal.types import TealType, require_type
 
@@ -25,7 +27,7 @@ class LazyAnd(Expr):
     def __str__(self):
         return "(LazyAnd " + " ".join(map(str, self.args)) + ")"
 
-    def _build_ast(self, remaining: list[Expr]):
+    def _build_ast(self, remaining: Sequence[Expr]):
         if len(remaining) == 0:
             raise ValueError("list of remaining expressions unexpectedly shrunk to 0")
         if len(remaining) == 1:
@@ -59,7 +61,7 @@ class LazyOr(Expr):
     def __str__(self):
         return "(LazyOr " + " ".join(map(str, self.args)) + ")"
 
-    def _assemble(self, remaining: list[Expr]):
+    def _assemble(self, remaining: Sequence[Expr]):
         if len(remaining) == 0:
             raise ValueError("list of remaining expressions unexpectedly shrunk to 0")
         if len(remaining) == 1:
