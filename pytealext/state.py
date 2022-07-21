@@ -1,6 +1,6 @@
 from typing import Union
 
-from pyteal import App, Bytes, Concat, Expr, Int, Itob, MaybeValue, TealType
+from pyteal import App, Bytes, Concat, Expr, Int, Itob, MaybeValue, Seq, TealType
 from pyteal.types import require_type
 
 
@@ -30,6 +30,12 @@ class State:
     def get(self) -> App:
         """
         Get a value from a state schema
+        """
+        raise NotImplementedError
+
+    def exists(self) -> App:
+        """
+        Check if the key of this state variable is present in current app's schema.
         """
         raise NotImplementedError
 
@@ -66,6 +72,10 @@ class LocalState(State):
     def get(self) -> App:
         return App.localGet(Int(0), self._name)
 
+    def exists(self) -> Expr:
+        ex = App.localGetEx(Int(0), Int(0), self._name)
+        return Seq(ex, ex.hasValue())
+
 
 class GlobalState(State):
     """
@@ -78,6 +88,10 @@ class GlobalState(State):
 
     def get(self) -> App:
         return App.globalGet(self._name)
+
+    def exists(self) -> Expr:
+        ex = App.globalGetEx(Int(0), self._name)
+        return Seq(ex, ex.hasValue())
 
 
 def get_global_state_ex(foreign_id: int, key: str) -> MaybeValue:
@@ -95,13 +109,14 @@ class StateArray:
     Wrapper for state access which utilizes multiple slots
     """
 
-    def __init__(self, prefix: Union[str, Expr]):
+    def __init__(self, prefix: Union[str, Expr], type_hint: TealType = TealType.anytype):
         """
         Args:
             prefix: a key prefix in the global state, if it's a string it will be converted to Bytes.
             Prefix should be unique to avoid naming conflicts.
         """
         self._prefix = prefix
+        self.type_hint = type_hint
 
     def key_at_index(self, index: Union[int, Expr]) -> Expr:
         """
@@ -130,7 +145,7 @@ class LocalStateArray(StateArray):
     """
 
     def __getitem__(self, index: Union[int, Expr]):
-        return LocalState(self.key_at_index(index))
+        return LocalState(self.key_at_index(index), self.type_hint)
 
 
 class LocalStateArray2D(StateArray):
@@ -140,7 +155,7 @@ class LocalStateArray2D(StateArray):
 
     def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
         length, width = indices
-        return LocalStateArray(self.key_at_index(length))[width]
+        return LocalStateArray(self.key_at_index(length), self.type_hint)[width]
 
 
 class GlobalStateArray(StateArray):
@@ -149,7 +164,7 @@ class GlobalStateArray(StateArray):
     """
 
     def __getitem__(self, index: Union[int, Expr]):
-        return GlobalState(self.key_at_index(index))
+        return GlobalState(self.key_at_index(index), self.type_hint)
 
 
 class GlobalStateArray2D(StateArray):
@@ -159,4 +174,4 @@ class GlobalStateArray2D(StateArray):
 
     def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
         length, width = indices
-        return GlobalStateArray(self.key_at_index(length))[width]
+        return GlobalStateArray(self.key_at_index(length), self.type_hint)[width]

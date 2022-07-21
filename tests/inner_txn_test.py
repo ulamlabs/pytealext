@@ -182,7 +182,8 @@ def test_makeInnerGroupTxn():
         InnerTxnBuilder.Next(),
         InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.AssetTransfer),
         InnerTxnBuilder.SetField(
-            TxnField.asset_receiver, Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE")
+            TxnField.asset_receiver,
+            Addr("A7NMWS3NT3IUDMLVO26ULGXGIIOUQ3ND2TXSER6EBGRZNOBOUIQXHIBGDE"),
         ),
         InnerTxnBuilder.Next(),
         InnerTxnBuilder.SetField(TxnField.type_enum, TxnType.ApplicationCall),
