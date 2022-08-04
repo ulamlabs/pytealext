@@ -516,7 +516,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             app = stack.pop()
             account = stack.pop()
             if app != 0 or account != 0:
-                raise Exception("app_local_get_ex is only supported with 0" " as the account and application parameter")
+                raise Exception("app_local_get_ex is only supported with 0 as the account and application parameter")
             if not isinstance(key, bytes):
                 raise Panic("app_local_get_ex key must be a bytes value", current_line)
             val = context.local_state.get(key, 0)
