@@ -1,7 +1,19 @@
 from inspect import getfullargspec
 
 import pytest
-from pyteal import Addr, App, Bytes, CompileOptions, Global, Int, Mode, TealBlock, TealComponent, TxnField, TxnType
+from pyteal import (
+    Addr,
+    App,
+    Bytes,
+    CompileOptions,
+    Global,
+    Int,
+    Mode,
+    TealBlock,
+    TealComponent,
+    TxnField,
+    TxnType,
+)
 
 from pytealext.inner_transactions import *  # pylint: disable=unused-wildcard-import
 

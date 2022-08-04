@@ -2,7 +2,13 @@ import pytest
 from pyteal import App, Assert, Bytes, For, Int, Not, Return, ScratchVar, Seq
 
 from pytealext.evaluator import EvalContext
-from pytealext.state import GlobalState, GlobalStateArray2D, LocalState, LocalStateArray, LocalStateArray2D
+from pytealext.state import (
+    GlobalState,
+    GlobalStateArray2D,
+    LocalState,
+    LocalStateArray,
+    LocalStateArray2D,
+)
 
 from .helpers import compile_and_run
 

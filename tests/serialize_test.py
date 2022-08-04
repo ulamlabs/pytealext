@@ -1,9 +1,8 @@
-import pytest
 from hypothesis import given, note
 from hypothesis import strategies as st
-from pyteal import Approve, Bytes, Int, Mode, ScratchSlot, Seq, compileTeal
+from pyteal import Approve, Int, Mode, ScratchSlot, Seq, compileTeal
 
-from pytealext.evaluator import Panic, eval_teal
+from pytealext.evaluator import eval_teal
 from pytealext.serialize import DeserializeIntegers, DeserializeIntegersToSlots, SerializeIntegers
 
 
