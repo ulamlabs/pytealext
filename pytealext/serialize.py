@@ -2,6 +2,7 @@ from pyteal import (
     CompileOptions,
     Concat,
     Expr,
+    Extract,
     ExtractUint16,
     ExtractUint32,
     ExtractUint64,
@@ -15,7 +16,7 @@ from pyteal import (
     TealOp,
     TealType,
 )
-from pyteal.errors import verifyTealVersion
+from pyteal.errors import verifyProgramVersion
 from pyteal.types import require_type
 
 
@@ -40,7 +41,7 @@ class ExtractSL(Expr):
         self.length = length
 
     def __teal__(self, options: CompileOptions):
-        verifyTealVersion(
+        verifyProgramVersion(
             Op.extract.min_version,
             options.version,
             f"TEAL version too low to use op {Op.extract}",
