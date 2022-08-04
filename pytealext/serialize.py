@@ -2,7 +2,6 @@ from pyteal import (
     CompileOptions,
     Concat,
     Expr,
-    Extract,
     ExtractUint16,
     ExtractUint32,
     ExtractUint64,
@@ -75,17 +74,17 @@ def SerializeIntegers(*ints: Expr, width: int = 64) -> Expr:
     """
     if width == 64:
         return Concat(*[Itob(i) for i in ints])
-    elif width == 32:
+    if width == 32:
         # extract the lowest 32 bits (4 bytes) from each integer
         return Concat(*[ExtractSL(4, 4, Itob(i)) for i in ints])
-    elif width == 16:
+    if width == 16:
         # extract the lowest 16 bits (2 bytes) from each integer
         return Concat(*[ExtractSL(6, 2, Itob(i)) for i in ints])
-    else:
-        raise ValueError(f"Invalid width: {width}")
+
+    raise ValueError(f"Invalid width: {width}")
 
 
-class DeserializeIntegers:
+class DeserializeIntegers:  # pylint: disable=too-few-public-methods
     """
     Deserialize bytes into a sequence of integers.
     The deserialized integers are put in the provided slots.

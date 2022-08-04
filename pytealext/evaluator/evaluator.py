@@ -7,7 +7,12 @@ INTEGER_SIZE = 2**64
 
 
 def int_to_trimmed_bytes(value: int) -> bytes:
-    byte_length = (max(value.bit_length(), 1) + 7) // 8
+    """Convert an integer into a big-endian byte array with no leading zero bytes
+
+    Special case: zero is converted to a single zero byte
+    """
+    byte_length = (value.bit_length() + 7) // 8
+    byte_length = max(1, byte_length)  # handle zero special case
     return value.to_bytes(byte_length, "big")
 
 
@@ -39,7 +44,7 @@ MaxLocalStateSize = 16
 MaxGlobalStateSize = 64
 
 
-class EvalContext:
+class EvalContext:  # pylint: disable=too-few-public-methods
     """
     Class containing the execution environment for an application call
     """
@@ -71,7 +76,7 @@ def split128(val: int):
     return val // INTEGER_SIZE, val % INTEGER_SIZE
 
 
-def eval_teal(  # noqa: C901
+def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     lines: list[str],
     return_stack=True,
     context: EvalContext or None = None,

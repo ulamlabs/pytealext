@@ -60,7 +60,7 @@ class MulDiv64(Expr):
         return assemble_steps(self._get_steps(), options)
 
     def __str__(self):
-        return "(MulDiv64 {} {} {})".format(self.m1, self.m2, self.d)
+        return f"(MulDiv64 {self.m1} {self.m2} {self.d})"
 
     def type_of(self):
         return TealType.uint64
