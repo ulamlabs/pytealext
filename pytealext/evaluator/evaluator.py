@@ -71,7 +71,7 @@ def split128(val: int):
     return val // INTEGER_SIZE, val % INTEGER_SIZE
 
 
-def eval_teal(
+def eval_teal(  # noqa: C901
     lines: list[str],
     return_stack=True,
     context: EvalContext or None = None,
@@ -539,7 +539,7 @@ def eval_teal(
             if context is None:
                 raise Exception("log requires execution environment context")
             context.log.append(val)
-            if sum(len(l) for l in context.log) > MaxLogSize:
+            if sum(len(log) for log in context.log) > MaxLogSize:
                 raise Panic("log size limit exceeded", current_line)
             if len(context.log) > MaxLogCalls:
                 raise Panic("log calls limit exceeded", current_line)
