@@ -15,7 +15,7 @@ from pyteal import (
     TxnType,
 )
 
-from pytealext.inner_transactions import *  # pylint: disable=unused-wildcard-import
+from pytealext.inner_transactions import *  # pylint: disable=unused-wildcard-import,wildcard-import
 
 # According to PEP 468 order in kwargs is preserved, so we can safely check equality of Seqs
 
@@ -214,8 +214,6 @@ def test_example_gtxn_compiles():
     """Test that example gtxn from docs compiles"""
 
     from pyteal import AppParam, Approve, MethodSignature, compileTeal
-
-    from pytealext import InnerAssetTransferTxn, InnerNoOpTxn, MakeInnerGroupTxn
 
     app_to_call = Int(12345)
     amount_to_deposit = Int(100)

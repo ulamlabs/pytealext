@@ -122,7 +122,7 @@ class StateArray:
         """
         Get the actual key (bytes) that will be used to access the state information
         """
-        if isinstance(index, int):
+        if isinstance(index, int):  # pylint: disable=no-else-return
             if isinstance(self._prefix, str):
                 # index: int, prefix: str
                 return Bytes(self._prefix.encode("utf-8") + index.to_bytes(8, "big"))

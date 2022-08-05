@@ -87,7 +87,11 @@ def test_equals():
 
 def test_math_ops_fail_with_byte_type():
     ops = ["addw", "mulw", "/", "%", "+", "-", "*", "&&", "||", ">", "<"]
-    bad_programs = [["byte 0x01", "byte 0x02"], ["byte 0x03", "int 4"], ["int 5", "byte 0x06"]]
+    bad_programs = [
+        ["byte 0x01", "byte 0x02"],
+        ["byte 0x03", "int 4"],
+        ["int 5", "byte 0x06"],
+    ]
     for op in ops:
         for bad_program in bad_programs:
             bp = bad_program + [op]
@@ -155,7 +159,11 @@ def test_local_state():
 
     program = Seq(
         *[
-            App.localPut(Int(0), Bytes(key), (Bytes(value) if isinstance(value, bytes) else Int(value)))
+            App.localPut(
+                Int(0),
+                Bytes(key),
+                (Bytes(value) if isinstance(value, bytes) else Int(value)),
+            )
             for key, value in mapping.items()
         ],
         And(
@@ -181,17 +189,27 @@ def test_local_state():
 
 @given(
     i=st.integers(min_value=0, max_value=2**10),
-    j=st.integers(min_value=0, max_value=64),
+    j=st.integers(min_value=1, max_value=64),
 )
 def test_exp(i: int, j: int):
     assume(i**j <= 2**64 - 1)
-    assume(not (i == 0 and j == 0))
     i_int = Int(i)
     j_int = Int(j)
 
     expected = Int(i**j)
 
     expr = Eq(Exp(i_int, j_int), expected)
+    expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
+
+    stack, _ = eval_teal(expr_asm.splitlines())
+
+    assert len(stack) == 1
+    assert stack[0] == 1
+
+
+@pytest.mark.parametrize("base", [1, 2, 1000000007, 2**64 - 1])
+def test_exp_zero_exponent(base: int):
+    expr = Eq(Exp(Int(base), Int(0)), Int(1))
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
     stack, _ = eval_teal(expr_asm.splitlines())
