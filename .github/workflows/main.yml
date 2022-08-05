@@ -2,8 +2,9 @@ name: pytealext CI
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
