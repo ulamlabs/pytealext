@@ -19,6 +19,7 @@ from .inner_transactions import (
 )
 from .lazy import LazyAnd, LazyOr
 from .muldiv64 import MulDiv64
+from .mul128 import Mul128
 from .serialize import DeserializeIntegers, DeserializeIntegersToSlots, ExtractSL, SerializeIntegers
 from .state import (
     GlobalState,
@@ -49,6 +50,7 @@ __all__ = [
     "MakeInnerAssetConfigTxn",
     "MakeInnerApplicationCallTxn",
     "MakeInnerNoOpTxn",
+    "Mul128",
     "MulDiv64",
     "Min",
     "Max",
