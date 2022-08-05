@@ -21,10 +21,12 @@ class Mul128(Expr):
     """
 
     def __init__(self, m1: Expr, m2: Expr):
-        """
+        """Calculate the m1 * m2
+
         Args:
-            ceiling: Calculate the m1 * m2
-        """
+            m1 (TealType.uint64): factor
+            m2 (TealType.uint64): factor
+        """        
         super().__init__()
         # make sure that argument expressions have the correct return type
         require_type(m1, TealType.uint64)

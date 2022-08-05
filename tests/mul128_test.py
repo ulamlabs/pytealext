@@ -1,7 +1,7 @@
 import os
 import sys
 from hypothesis import given, settings, example
-from hypothesis.strategies import integers
+from hypothesis import strategies as st
 
 from pyteal import (
     Int,
@@ -10,10 +10,6 @@ from pyteal import (
     Mode,
     Seq,
 )
-
-THIS_DIR = os.path.dirname(os.path.realpath(__file__))
-THIS_DIR = os.path.dirname(os.path.realpath(THIS_DIR))
-sys.path.insert(1, THIS_DIR)
 
 from pytealext.mul128 import Mul128
 
@@ -25,7 +21,7 @@ MAX_UINT64 = 2 ** 64 - 1
 
 
 
-@given(integers(min_value=0, max_value=MAX_UINT64), integers(min_value=0, max_value=MAX_UINT64))
+@given(st.integers(min_value=0, max_value=MAX_UINT64), st.integers(min_value=0, max_value=MAX_UINT64))
 @settings(max_examples=100)
 @example(0,0)
 @example(MAX_UINT64, MAX_UINT64)
