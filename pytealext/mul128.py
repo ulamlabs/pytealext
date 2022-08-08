@@ -1,14 +1,6 @@
 from typing import Iterator
 
-from pyteal import (
-    CompileOptions,
-    Expr,
-    Op,
-    TealBlock,
-    TealSimpleBlock,
-    TealOp,
-)
-
+from pyteal import CompileOptions, Expr, Op, TealBlock, TealOp, TealSimpleBlock
 from pyteal.types import TealType, require_type
 
 from .assemble import assemble_steps
@@ -16,7 +8,8 @@ from .assemble import assemble_steps
 
 class Mul128(Expr):
     """
-    Mul128 calculates the expression m1 * m2, where m1 and m2 are TealType.uint64.
+    Mul128 calculates the expression m1 * m2,
+    where m1 and m2 are TealType.uint64.
     The result of this operation is a bytes.
     """
 
