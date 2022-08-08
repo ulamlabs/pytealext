@@ -6,7 +6,7 @@ VERSION = 5
 
 
 def compile_and_run(
-    ast: Expr, mode=Mode.Application, version=VERSION, *, context=None
+    ast: Expr, mode=Mode.Application, version=VERSION, *, context=None, debug=None
 ) -> tuple[list[bytes or int], list[bytes or int]]:
     compiled = compileTeal(ast, mode, version=version)
-    return eval_teal(compiled.splitlines(), context=context)
+    return eval_teal(compiled.splitlines(), context=context, debug=debug)
