@@ -1,6 +1,7 @@
 from . import evaluator
 from .assemble import assemble_steps
 from .cas import BytesMax, BytesMin, CompareAndSelect, Max, Min
+from .fastexp import FastExp
 from .inner_transactions import (
     InnerApplicationCallTxn,
     InnerAssetConfigTxn,
@@ -18,8 +19,8 @@ from .inner_transactions import (
     MakeInnerTxn,
 )
 from .lazy import LazyAnd, LazyOr
-from .muldiv64 import MulDiv64
 from .mul128 import Mul128
+from .muldiv64 import MulDiv64
 from .serialize import DeserializeIntegers, DeserializeIntegersToSlots, ExtractSL, SerializeIntegers
 from .state import (
     GlobalState,
@@ -36,6 +37,7 @@ __all__ = [
     "evaluator",
     "CompareAndSelect",
     "ExtractSL",
+    "FastExp",
     "InnerAssetConfigTxn",
     "InnerAssetFreezeTxn",
     "InnerAssetTransferTxn",
