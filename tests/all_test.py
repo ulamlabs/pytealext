@@ -1,12 +1,11 @@
-from typing import Tuple, Union
+from typing import Union
 
 from hypothesis import assume, given
 from hypothesis import strategies as st
-from pyteal import And, Expr, Int, Mode, Not, Or, compileTeal
+from pyteal import And, Expr, Int, Not, Or
 
 from pytealext import LazyAnd, LazyOr, Max, Min
-from pytealext.evaluator import eval_teal
-from tests.helpers import compile_and_run
+from pytealext.evaluator import compile_and_run
 
 u64_strategy = st.integers(min_value=0, max_value=2**64 - 1)
 # TEAL version to use for testing

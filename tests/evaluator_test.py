@@ -21,8 +21,7 @@ from pyteal import (
     compileTeal,
 )
 
-from pytealext.evaluator import EvalContext, Panic, eval_teal
-from tests.helpers import compile_and_run
+from pytealext.evaluator import EvalContext, Panic, compile_and_run, eval_teal
 
 VERSION = 5
 

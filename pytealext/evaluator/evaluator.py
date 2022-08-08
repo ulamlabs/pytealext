@@ -1,6 +1,7 @@
 from math import isqrt
 from typing import IO
 
+from algosdk.encoding import decode_address
 from algosdk.future.transaction import ApplicationCallTxn
 
 INTEGER_SIZE = 2**64
@@ -624,8 +625,11 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
                 stack.append(context.txn.app_args[arg_index])
             else:
                 raise Exception("Unsupported txna expression")
-        elif op == "byte":
+        elif op == "addr":
             arg = args[0]
+            stack.append(decode_address(arg))
+        elif op == "byte":
+            arg = line[5:]
             if arg[0] == '"' and arg[-1] == '"':
                 arg = arg[1:-1]  # strip quotes
                 arg = arg.encode("utf-8")
