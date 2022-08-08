@@ -3,7 +3,7 @@ from hypothesis import strategies as st
 from pyteal import Bytes, Int, ScratchVar, Seq
 
 from pytealext import BytesMax, BytesMin
-from tests.helpers import compile_and_run
+from pytealext.evaluator import compile_and_run
 
 
 @given(

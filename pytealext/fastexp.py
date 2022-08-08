@@ -18,15 +18,8 @@ def FastExp(base: Expr, exponent: Expr) -> Expr:
             Seq(
                 If(exponent == Int(1)).Then(Return(Itob(base))),
                 x.store(Mul128(base, base)),
-                If(exponent % Int(2))
-                .Then(
-                    #
-                    y.store(Itob(base))
-                )
-                .Else(
-                    #
-                    y.store(Itob(Int(1)))
-                ),
+                If(exponent == Int(2)).Then(Return(x.load())),
+                If(exponent % Int(2)).Then(y.store(Itob(base))).Else(y.store(Itob(Int(1)))),
                 current_exponent.store(exponent / Int(2)),
                 While(current_exponent.load() > Int(1)).Do(
                     Seq(

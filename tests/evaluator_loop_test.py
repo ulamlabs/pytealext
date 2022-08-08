@@ -1,6 +1,6 @@
 from pyteal import Expr, If, Int, Return, ScratchVar, Seq, Subroutine, TealType, While
 
-from tests.helpers import compile_and_run
+from pytealext.evaluator import compile_and_run
 
 
 def fib(n: int) -> int:
