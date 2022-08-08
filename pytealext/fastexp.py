@@ -1,6 +1,6 @@
 from pyteal import BytesMul, Expr, If, Int, Itob, Return, ScratchVar, Seq, Subroutine, TealType, While
 
-from pytealext import Mul128
+from .mul128 import Mul128
 
 
 @Subroutine(TealType.bytes, "pytealextFastExp")
