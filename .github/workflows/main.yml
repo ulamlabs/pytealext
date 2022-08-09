@@ -44,3 +44,6 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint pytealext
+    - name: black
+      run: |
+        black . --check
