@@ -8,7 +8,7 @@ on:
   # Allows to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# jobs:
+jobs:
 #   test:
 #     name: pytest
 #     runs-on: ubuntu-latest
