@@ -2,3 +2,4 @@
 hypothesis
 pytest
 pylint
+black
