@@ -28,7 +28,7 @@ jobs:
         pytest
       
   lint:
-    name: pylint
+    name: linters
     runs-on: ubuntu-latest
 
     steps:
@@ -44,6 +44,6 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint pytealext
-    - name: black
+    - name: Check with black
       run: |
         black . --check
