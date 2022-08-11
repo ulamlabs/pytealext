@@ -18,8 +18,8 @@ def substitute_template_values(teal: str, substitutions: dict[str, str]) -> str:
 def compile_and_run(
     ast: Expr,
     mode: Mode = Mode.Application,
-    version: int = MAX_PROGRAM_VERSION,
     *,
+    version: int = MAX_PROGRAM_VERSION,
     context: EvalContext = None,
     debug: IO = None,
     tmpl_subs: dict[str, str] = None
