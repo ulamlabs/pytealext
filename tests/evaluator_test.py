@@ -17,13 +17,14 @@ from pyteal import (
     Log,
     Mode,
     Pop,
+    Replace,
     Seq,
     compileTeal,
 )
 
 from pytealext.evaluator import EvalContext, Panic, compile_and_run, eval_teal
 
-VERSION = 5
+VERSION = 7
 
 
 @given(
@@ -241,3 +242,30 @@ def test_exp_fails_for_overflow(i: int, j: int):
 
     with pytest.raises(Panic, match="Overflow"):
         eval_teal(expr_asm.splitlines())
+
+
+@pytest.mark.parametrize(
+    "string,start,replacement,expected",
+    (
+        ("", 0, "", ""),
+        ("b", 0, "a", "a"),
+        ("Hello, World!", 7, "devil", "Hello, devil!"),
+        ("Hello, World!", 5, "", "Hello, World!"),
+    ),
+)
+def test_replace(string: str, start: int, replacement: str, expected: str):
+    program_rep2 = Replace(Bytes(string), Int(start), Bytes(replacement)) == Bytes(expected)
+    program_rep2 = compileTeal(program_rep2, Mode.Application, version=VERSION)
+    # check that we are really testing replace2
+    assert "replace2" in program_rep2
+
+    stack, _ = eval_teal(program_rep2.splitlines())
+    assert stack == [1]
+
+    program_rep3 = Replace(Bytes(string), Int(start) + Int(0), Bytes(replacement)) == Bytes(expected)
+    program_rep3 = compileTeal(program_rep3, Mode.Application, version=VERSION)
+    # check that we are really testing replace3
+    assert "replace3" in program_rep3
+
+    stack, _ = eval_teal(program_rep3.splitlines())
+    assert stack == [1]

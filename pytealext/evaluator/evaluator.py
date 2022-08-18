@@ -616,6 +616,26 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             if b + 8 > len(a):
                 raise Panic("Out of bounds", current_line)
             stack.append(int.from_bytes(a[b : b + 8], "big"))
+        elif op == "replace2":
+            start_position = int(args[0])
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, bytes):
+                raise Panic("Invalid type", current_line)
+            if start_position + len(b) > len(a):
+                raise Panic("Out of bounds", current_line)
+            res = a[:start_position] + b + a[start_position + len(b) :]
+            stack.append(res)
+        elif op == "replace3":
+            c = stack.pop()
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, bytes) or not isinstance(b, int) or not isinstance(c, bytes):
+                raise Panic("Invalid type", current_line)
+            if b + len(c) > len(a):
+                raise Panic("Out of bounds", current_line)
+            res = a[:b] + c + a[b + len(c) :]
+            stack.append(res)
         # provisional support for txna
         elif op == "txna":
             if args[0] == "ApplicationArgs":
