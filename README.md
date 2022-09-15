@@ -6,6 +6,7 @@ Additional useful operations for Python
 - `Mul128`, `FastExp`: Optimize operations that take uints and output bytes (big ints)
 - `Min`, `Max`: calculate minimum/maximum of 2 expressions, without using slots or evaluating arguments more than once (TEAL 4+)
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation
+- `SaturatingAdd`, `SaturatingSub`: saturating addition/subtraction
 - [Inner Transactions](https://github.com/ulamlabs/pytealext/blob/main/docs/inner_transactions.md): simplified making of inner transactions
     - `MakeInnerPaymentTxn`, `MakeInnerAssetTransferTxn` and more!
     - `MakeInnerGroupTxn` to execute inner atomic group transactions

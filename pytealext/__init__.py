@@ -21,6 +21,7 @@ from .inner_transactions import (
 from .lazy import LazyAnd, LazyOr
 from .mul128 import Mul128
 from .muldiv64 import MulDiv64
+from .saturation_math import SaturatingAdd, SaturatingSub
 from .serialize import DeserializeIntegers, DeserializeIntegersToSlots, ExtractSL, SerializeIntegers
 from .state import (
     GlobalState,
@@ -70,4 +71,6 @@ __all__ = [
     "SerializeIntegers",
     "DeserializeIntegers",
     "DeserializeIntegersToSlots",
+    "SaturatingAdd",
+    "SaturatingSub",
 ]
