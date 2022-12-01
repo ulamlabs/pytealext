@@ -56,7 +56,19 @@ class MulDiv64(Expr):
         yield TealOp(self, Op.logic_not)
         yield TealOp(self, Op.assert_)
 
+    def _get_steps_floor_v6(self) -> Iterator[Expr or TealOp]:
+        """
+        Much faster algorithm available since TEAL 6 and only for floor division
+        """
+        yield self.m1
+        yield self.m2
+        yield TealOp(self, Op.mulw)
+        yield self.d
+        yield TealOp(self, Op.divw)
+
     def __teal__(self, options: CompileOptions) -> tuple[TealBlock, TealSimpleBlock]:
+        if not self.ceiling and options.version >= 6:
+            return assemble_steps(self._get_steps_floor_v6(), options)
         return assemble_steps(self._get_steps(), options)
 
     def __str__(self):
