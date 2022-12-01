@@ -457,6 +457,16 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             if len(a) > 64:
                 raise Panic("Bytes overflow", current_line)
             stack.append(int_to_trimmed_bytes(isqrt(int.from_bytes(a, "big"))))
+        elif op == "divw":
+            c = stack.pop()
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int) or not isinstance(b, int) or not isinstance(c, int):
+                raise Panic("All arguments to divw must be integers", current_line)
+            res = (a * INTEGER_SIZE + b) // c
+            if res >= INTEGER_SIZE:
+                raise Panic("Division overflow", current_line)
+            stack.append(res)
         elif op == "bzero":
             a = stack.pop()
             if not isinstance(a, int):
