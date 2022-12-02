@@ -44,6 +44,9 @@ jobs:
     - name: Lint with pylint
       run: |
         pylint pytealext
+    - name: Check with isort
+      run: |
+        isort . --check
     - name: Check with black
       run: |
         black . --check
