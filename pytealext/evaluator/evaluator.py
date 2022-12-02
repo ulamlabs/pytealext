@@ -78,7 +78,7 @@ def split128(val: int):
 
 
 def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-    lines: list[str],
+    lines: list[str] | str,
     return_stack=True,
     context: EvalContext or None = None,
     debug: IO or None = None,
@@ -87,7 +87,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
     Simulate a basic teal program.
 
     Args:
-        lines: list of TEAL program lines
+        lines: list of TEAL program lines or compiled program string
         return_stack: whenther "return" opcode shall return the whole stack, not just the value on top
             This is useful in validating if custom TEAL code produces correct amount of values on stack.
             Moreover, with pyteal v0.8 every compiled program has a "return" at the end,
@@ -99,6 +99,11 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
     Returns:
         tuple of (stack, slots)
     """
+    if isinstance(lines, str):
+        lines = lines.splitlines()
+    if not isinstance(lines, list):
+        raise TypeError("lines must be a list of strings or a string")
+
     stack = []  # type: list[int or str]
     call_stack = []  # type: list[int]
     slots = [0 for _ in range(256)]
