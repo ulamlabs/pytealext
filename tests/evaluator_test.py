@@ -34,7 +34,7 @@ def test_itob_btoi_idempotency(i: int):
     expr = Btoi(Itob(Int(i)))
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
-    stack, _ = eval_teal(expr_asm.splitlines())
+    stack, _ = eval_teal(expr_asm)
 
     assert len(stack) == 1
     assert stack[0] == i
@@ -47,7 +47,7 @@ def test_btoi(b: bytes):
     expr = Btoi(Bytes(b))
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
-    stack, _ = eval_teal(expr_asm.splitlines())
+    stack, _ = eval_teal(expr_asm)
 
     assert len(stack) == 1
     assert stack[0] == int.from_bytes(b, "big")
@@ -58,7 +58,7 @@ def test_log():
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
     ctx = EvalContext()
-    stack, _ = eval_teal(expr_asm.splitlines(), context=ctx)
+    stack, _ = eval_teal(expr_asm, context=ctx)
 
     assert stack == [1]
     assert ctx.log == [b"wubwub", b"numbertwo"]
@@ -201,7 +201,7 @@ def test_exp(i: int, j: int):
     expr = Eq(Exp(i_int, j_int), expected)
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
-    stack, _ = eval_teal(expr_asm.splitlines())
+    stack, _ = eval_teal(expr_asm)
 
     assert len(stack) == 1
     assert stack[0] == 1
@@ -212,7 +212,7 @@ def test_exp_zero_exponent(base: int):
     expr = Eq(Exp(Int(base), Int(0)), Int(1))
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
-    stack, _ = eval_teal(expr_asm.splitlines())
+    stack, _ = eval_teal(expr_asm)
 
     assert len(stack) == 1
     assert stack[0] == 1
@@ -226,7 +226,7 @@ def test_exp_fails_for_zeroes():
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
     with pytest.raises(Panic, match="Invalid input"):
-        eval_teal(expr_asm.splitlines())
+        eval_teal(expr_asm)
 
 
 @given(
@@ -241,7 +241,7 @@ def test_exp_fails_for_overflow(i: int, j: int):
     expr_asm = compileTeal(expr, Mode.Application, version=VERSION)
 
     with pytest.raises(Panic, match="Overflow"):
-        eval_teal(expr_asm.splitlines())
+        eval_teal(expr_asm)
 
 
 @pytest.mark.parametrize(
