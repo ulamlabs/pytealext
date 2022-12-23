@@ -33,6 +33,7 @@ from .state import (
     LocalStateArray2D,
     get_global_state_ex,
 )
+from .u64_array import Uint64Array
 
 __all__ = [
     "assemble_steps",
@@ -75,4 +76,5 @@ __all__ = [
     "DeserializeIntegersToSlots",
     "SaturatingAdd",
     "SaturatingSub",
+    "Uint64Array",
 ]
