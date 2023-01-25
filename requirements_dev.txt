@@ -1,6 +1,7 @@
 -r requirements.txt
 hypothesis
 pytest
+pytest-xdist
 pylint
 black
 isort

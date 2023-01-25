@@ -8,6 +8,8 @@ build-backend = "setuptools.build_meta"
 [tool.isort]
 line_length = 120
 profile = "black"
+skip = "venv"
 
 [tool.black]
 line-length = 120
+skip = "venv"
