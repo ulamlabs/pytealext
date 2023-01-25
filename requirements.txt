@@ -1,2 +1,2 @@
-pyteal>=0.15.0
-py-algorand-sdk >= 1.15.0
+pyteal>=0.22.0, < 1.0.0
+py-algorand-sdk >= 2.0.0, < 3.0.0

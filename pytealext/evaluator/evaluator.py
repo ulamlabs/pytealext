@@ -1,8 +1,9 @@
+from dataclasses import dataclass
 from math import isqrt
 from typing import IO
 
 from algosdk.encoding import decode_address
-from algosdk.future.transaction import ApplicationCallTxn
+from algosdk.transaction import ApplicationCallTxn
 
 INTEGER_SIZE = 2**64
 
@@ -69,6 +70,17 @@ class EvalContext:  # pylint: disable=too-few-public-methods
         self.log = []  # type: list[bytes]
 
 
+@dataclass
+class Frame:
+    """A call frame"""
+
+    ret_line: int
+    height: int
+    clear: bool = False  # should retsub clear the stack after returning from proto function
+    argc: int = 0  # argument count
+    retc: int = 0  # return values count
+
+
 def split128(val: int):
     """
     Splits a 128-bit integer into a tuple (x, y) of 64-bit integers
@@ -104,8 +116,8 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
     if not isinstance(lines, list):
         raise TypeError("lines must be a list of strings or a string")
 
-    stack = []  # type: list[int or str]
-    call_stack = []  # type: list[int]
+    stack: list[int | str] = []
+    call_stack: list[Frame] = []
     slots = [0 for _ in range(256)]
     branch_targets = {
         line[:-1]: nr  # strip trailing ":" from key, ex. b11: -> b11
@@ -114,6 +126,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
     }
 
     current_line = 0
+    op = "eval_teal__empty_opcode"  # current opcode
 
     while current_line < len(lines):
         line = lines[current_line]
@@ -135,6 +148,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             return [stack[-1]], slots
 
         line_s = line.split()
+        prev_op = op
         op = line_s[0]
         args = line_s[1:]
         if op == "err":
@@ -693,10 +707,53 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
         elif op == "b":
             current_line = branch_targets[args[0]]
         elif op == "callsub":
-            call_stack.append(current_line)
+            call_stack.append(Frame(current_line, len(stack)))
             current_line = branch_targets[args[0]]
         elif op == "retsub":
-            current_line = call_stack.pop()
+            if len(call_stack) == 0:
+                raise Panic("retsub with empty call stack", current_line)
+            frame = call_stack.pop()
+            if frame.clear:
+                expect = frame.height + frame.retc
+                if len(stack) < expect:
+                    raise Panic(
+                        f"retsub with stack size {len(stack)} but expected at least {expect}",
+                        current_line,
+                    )
+                argstart = frame.height - frame.argc
+                bottom_stack = stack[:argstart]
+                returns = stack[frame.height : expect]
+                stack = bottom_stack + returns
+
+            current_line = frame.ret_line
+        elif op == "proto":
+            if prev_op != "callsub":
+                raise Panic("proto must only be used after callsub", current_line)
+            call_stack[-1].argc = int(args[0])
+            call_stack[-1].retc = int(args[1])
+            call_stack[-1].clear = True
+        elif op in ("frame_dig", "frame_bury"):
+            arg_slot = int(args[0])  # should be negative
+            if len(call_stack) == 0:
+                raise Panic("frame_dig with empty call stack", current_line)
+            frame = call_stack[-1]
+            if frame.clear and -arg_slot > frame.argc:
+                raise Panic(
+                    f"frame_dig with arg_slot {arg_slot} but argc {frame.argc}",
+                    current_line,
+                )
+            index = frame.height + arg_slot
+            if index < 0 or index >= len(stack):
+                raise Panic(
+                    f"index {index} out of stack bounds [0,{len(stack)}]",
+                    current_line,
+                )
+            if op == "frame_dig":
+                stack.append(stack[index])
+            else:  # bury
+                if index == len(stack) - 1:
+                    raise Panic("frame_bury with index on top of stack", current_line)
+                stack[index] = stack.pop()
         elif op == "cover":
             nr = int(args[0])
             top = stack.pop()

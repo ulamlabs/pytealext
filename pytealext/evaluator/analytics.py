@@ -1,26 +1,6 @@
-import json
-import os
 from dataclasses import dataclass
 
-from algosdk import logic
-
-
-def _extract_opcodes_from_langspec() -> dict[str, dict]:
-    # load specifications and opcode details
-    script_path = os.path.realpath(logic.__file__)
-    script_dir = os.path.dirname(script_path)
-    langspec_file = os.path.join(script_dir, "data", "langspec.json")
-    with open(langspec_file, "rt", encoding="ascii") as fin:
-        spec = json.load(fin)
-
-    # retrieve opcode details and use opcode names as keys
-    opcodes = {}  # type: dict[str, dict]
-    for op in spec["Ops"]:
-        opcodes[op["Name"]] = op
-    return opcodes
-
-
-OPCODES = _extract_opcodes_from_langspec()
+from .data import OP_COSTS
 
 
 @dataclass
@@ -47,7 +27,7 @@ class ExecutionSummary:
         else:
             self.opcode_usage[opcode] += 1
         try:
-            self.execution_cost += OPCODES[opcode]["Cost"]
+            self.execution_cost += OP_COSTS[opcode]()
         except KeyError:
             # these pseudoops will have cost of 1 in compiled code
             # However the total may not be accurate due to usage of intcblock and bytecblock
