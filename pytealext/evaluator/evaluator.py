@@ -729,6 +729,11 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
         elif op == "proto":
             if prev_op != "callsub":
                 raise Panic("proto must only be used after callsub", current_line)
+            if len(stack) < int(args[0]):
+                raise Panic(
+                    f"proto with stack size {len(stack)} but expected at least {args[0]}",
+                    current_line,
+                )
             call_stack[-1].argc = int(args[0])
             call_stack[-1].retc = int(args[1])
             call_stack[-1].clear = True
