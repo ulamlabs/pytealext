@@ -14,7 +14,7 @@ OP_COSTS: dict[str, Callable] = {
     "ecdsa_pk_decompress": (
         lambda *a, **k: NotImplementedError('ecdsa_pk_decompress: costByField("v", &EcdsaCurves, ecdsaDecompressCosts)')
     ),
-    "ecdsa_pk_recover": (lambda *a, **k: 1),
+    "ecdsa_pk_recover": (lambda *a, **k: NotImplementedError('ecdsa_pk_recover: field("v", &EcdsaCurves).costs(2000)')),
     "+": (lambda *a, **k: 1),
     "-": (lambda *a, **k: 1),
     "/": (lambda *a, **k: 1),
@@ -181,6 +181,6 @@ OP_COSTS: dict[str, Callable] = {
     "gloadss": (lambda *a, **k: 1),
     "itxnas": (lambda *a, **k: 1),
     "gitxnas": (lambda *a, **k: 1),
-    "vrf_verify": (lambda *a, **k: 1),
+    "vrf_verify": (lambda *a, **k: NotImplementedError('vrf_verify: field("s", &VrfStandards).costs(5700)')),
     "block": (lambda *a, **k: 1),
 }
