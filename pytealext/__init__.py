@@ -1,4 +1,5 @@
-from . import evaluator
+from . import array, evaluator
+from .array import Uint64Array
 from .assemble import assemble_steps
 from .auto_load_scratch_var import AutoLoadScratchVar
 from .cas import BytesMax, BytesMin, CompareAndSelect, Max, Min
@@ -33,9 +34,9 @@ from .state import (
     LocalStateArray2D,
     get_global_state_ex,
 )
-from .u64_array import Uint64Array
 
 __all__ = [
+    "array",
     "assemble_steps",
     "AutoLoadScratchVar",
     "evaluator",

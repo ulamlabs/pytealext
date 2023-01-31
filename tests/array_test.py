@@ -6,10 +6,17 @@ from hypothesis import strategies as st
 from hypothesis.strategies import DataObject
 from pyteal import Assert, Bytes, Int, ScratchVar, Seq, TealType
 
+from examples.array import increment_program
 from pytealext import Uint64Array
 from pytealext.evaluator import compile_and_run
 
 UINT64_MAX = 2**64 - 1
+
+
+def test_array_example():
+    program = increment_program()
+    stack, _ = compile_and_run(program)
+    assert stack == [1]
 
 
 def encode_list(integers: list[int]) -> bytes:  # noqa
@@ -152,3 +159,29 @@ def test_product_bytes_zero_length():
 
     stack, _ = compile_and_run(program)
     assert stack == [1]
+
+
+@pytest.mark.parametrize(
+    "vals",
+    [
+        [],
+        [0],
+        [1],
+        [2],
+        [2, 0, 1000000000000, 1000000000000, 1000000000000, 0, 2],
+        [1000, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    ],
+)
+def test_product(vals: list[int]):
+    expected = prod(vals)
+
+    arr = Uint64Array()
+    program = Seq(
+        arr.initialize(),
+        *(arr.append(Int(val)) for val in vals),
+        arr.product(),
+    )
+
+    stack, _ = compile_and_run(program)
+    actual = stack[0]
+    assert actual == expected
