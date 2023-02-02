@@ -1,4 +1,5 @@
 from math import prod
+from typing import cast
 
 import pytest
 from hypothesis import given
@@ -144,8 +145,8 @@ def test_two_independend_arrays(a1: list[int], a2: list[int]):
     _, slots = compile_and_run(tree)
 
     actual = slots[1:5]
-    actual[0] = int.from_bytes(actual[0], "big")
-    actual[1] = int.from_bytes(actual[1], "big")
+    actual[0] = int.from_bytes(cast(bytes, actual[0]), "big")
+    actual[1] = int.from_bytes(cast(bytes, actual[1]), "big")
     for i in range(4):
         assert expected[i] == actual[i]
 

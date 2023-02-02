@@ -41,7 +41,7 @@ def test_serialize_deserialize_idempotency(ints: list[int], width: int):
     expr_asm = compileTeal(expr, Mode.Application, version=5)
 
     _, slots = eval_teal(expr_asm.splitlines())
-    note(slots)
+    note(str(slots))
 
     for actual, expected in zip(slots[: len(ints)], ints):
         assert actual == expected

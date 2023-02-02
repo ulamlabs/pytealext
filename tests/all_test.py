@@ -21,8 +21,8 @@ def test_lazyand_boolean_equivalence_with_and(vals: list):
     """
     Test if LazyAnd and And produce the same outcomes
     """
-    ast_lazy_and = LazyAnd(*[Int(val) for val in vals])
-    ast_and = And(*[Int(val) for val in vals])
+    ast_lazy_and: Expr = LazyAnd(*[Int(val) for val in vals])
+    ast_and: Expr = And(*[Int(val) for val in vals])
 
     # convert to booleans
     ast_lazy_and = Bool(ast_lazy_and)
@@ -42,8 +42,8 @@ def test_lazyor_boolean_equivalence_with_or(vals: list):
     """
     Test if LazyOr and Or produce the same outcomes
     """
-    ast_lazy_or = LazyOr(*vals)
-    ast_or = Or(*vals)
+    ast_lazy_or: Expr = LazyOr(*vals)
+    ast_or: Expr = Or(*vals)
 
     # convert to booleans
     ast_lazy_or = Bool(ast_lazy_or)
@@ -68,7 +68,7 @@ def test_min(lhs: int, rhs: int):
 
 
 @given(tree=st.recursive(u64_strategy, lambda children: st.tuples(children, children)))
-def test_min_recursive(tree: Expr):
+def test_min_recursive(tree: Union[tuple, int]):
     """
     Fun experiment with generating random trees of Min
     """
