@@ -19,9 +19,16 @@ class AutoLoadScratchVar(Expr):
     ```
     """
 
-    def __init__(self, _type: TealType = TealType.anytype, slotId: int = None):  # pylint: disable=redefined-builtin
-        self.scratch_var = ScratchVar(_type, slotId)
+    def __init__(self, type: TealType = TealType.anytype, slotId: int = None):  # pylint: disable=redefined-builtin
+        self.scratch_var = ScratchVar(type, slotId)
         Expr.__init__(self)
+
+    @classmethod
+    def from_scratch_var(cls, scratch_var: ScratchVar) -> "AutoLoadScratchVar":
+        """Upgrade a ScratchVar to an AutoLoadScratchVar"""
+        c = cls()
+        c.scratch_var = scratch_var
+        return c
 
     def index(self) -> Expr:
         """Get the index of the used scratch slot"""
@@ -30,6 +37,10 @@ class AutoLoadScratchVar(Expr):
     def load(self) -> Expr:
         """Load the value from the scratch space"""
         return self.scratch_var.load()
+
+    def storage_type(self) -> TealType:
+        """Get the type of expressions that can be stored in this ScratchVar."""
+        return self.scratch_var.storage_type()
 
     def store(self, value: Expr | int | str | bytes) -> Expr:
         """Store the given value in the scratch space"""

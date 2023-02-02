@@ -773,6 +773,17 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             i = int(args[0])
             x = slots[i]
             stack.append(x)
+        elif op == "stores":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("stores expects integer slot ID", current_line)
+            slots[a] = b
+        elif op == "loads":
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("loads expects integer slot ID", current_line)
+            stack.append(slots[a])
         else:
             raise Exception(f"Operation '{line}'(line={current_line}) is not supported by the simulator")
     return stack, slots

@@ -81,3 +81,20 @@ def test_ALSV_cannot_be_passed_as_scratch_var():
     with pytest.raises(TealInputError, match=r"supplied argument .*? at index 0 had type .*? but was expecting type"):
         program = Seq((a := AutoLoadScratchVar()).store(22), increment(a))
         compile_and_run(program)
+
+
+def test_ALSV_from_scratch_var():
+    @Subroutine(TealType.none)
+    def increment(s: ScratchVar, a: Expr, s2: ScratchVar) -> Expr:
+        alsv = AutoLoadScratchVar.from_scratch_var(s2)
+        return Seq(
+            alsv.increment(a),
+            s.store(s.load() + a),
+        )
+
+    s1 = ScratchVar()
+    s2 = ScratchVar()
+    a = AutoLoadScratchVar()
+    program = Seq(s2.store(Int(7312)), a.store(1111), s1.store(Int(2222)), increment(s1, a, s2), s1.load() * s2.load())
+    stack, _ = compile_and_run(program)
+    assert stack[0] == (2222 + 1111) * (7312 + 1111)
