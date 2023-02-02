@@ -3,6 +3,7 @@ Additional useful operations for Python
 
 ## Available Operations
 - `MulDiv64`: calculate `m1*m2/d` with no overflow on multiplication (TEAL 3+)
+- `Uint64Array`: for when you need convenient integer arrays.
 - `Mul128`, `FastExp`: Optimize operations that take uints and output bytes (big ints)
 - `Min`, `Max`: calculate minimum/maximum of 2 expressions, without using slots or evaluating arguments more than once (TEAL 4+)
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation

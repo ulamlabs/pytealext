@@ -1,4 +1,5 @@
-from . import evaluator
+from . import array, evaluator
+from .array import Uint64Array
 from .assemble import assemble_steps
 from .auto_load_scratch_var import AutoLoadScratchVar
 from .cas import BytesMax, BytesMin, CompareAndSelect, Max, Min
@@ -35,6 +36,7 @@ from .state import (
 )
 
 __all__ = [
+    "array",
     "assemble_steps",
     "AutoLoadScratchVar",
     "evaluator",
@@ -75,4 +77,5 @@ __all__ = [
     "DeserializeIntegersToSlots",
     "SaturatingAdd",
     "SaturatingSub",
+    "Uint64Array",
 ]
