@@ -5,3 +5,4 @@ pytest-xdist
 pylint
 black
 isort
+mypy

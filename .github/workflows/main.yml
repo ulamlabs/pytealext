@@ -50,3 +50,6 @@ jobs:
     - name: Check with black
       run: |
         black . --check
+    - name: Check with mypy
+      run: |
+        mypy pytealext
