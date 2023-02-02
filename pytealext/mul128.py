@@ -27,7 +27,7 @@ class Mul128(Expr):
         self.m1 = m1
         self.m2 = m2
 
-    def _get_steps(self) -> Iterator[Expr or TealOp]:
+    def _get_steps(self) -> Iterator[Expr | TealOp]:
         yield self.m1
         yield self.m2
         # mult args and return results as two uint64

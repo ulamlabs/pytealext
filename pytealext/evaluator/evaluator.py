@@ -61,9 +61,9 @@ class EvalContext:  # pylint: disable=too-few-public-methods
     def __init__(
         self,
         *,
-        global_state: dict[bytes, bytes or int] or None = None,
-        local_state: dict[bytes, bytes or int] or None = None,
-        txn: ApplicationCallTxn or None = None,
+        global_state: dict[bytes, bytes | int] | None = None,
+        local_state: dict[bytes, bytes | int] | None = None,
+        txn: ApplicationCallTxn | None = None,
     ):
         """
         Args:
@@ -71,10 +71,10 @@ class EvalContext:  # pylint: disable=too-few-public-methods
             local_state: The local state of the user interacting with the application
             txn: The transaction that is being evaluated
         """
-        self.global_state = global_state if global_state is not None else {}  # type: dict[bytes, int or bytes]
-        self.local_state = local_state if local_state is not None else {}  # type: dict[bytes, int or bytes]
+        self.global_state: dict[bytes, int | bytes] = global_state if global_state is not None else {}
+        self.local_state: dict[bytes, int | bytes] = local_state if local_state is not None else {}
         self.txn = txn
-        self.log = []  # type: list[bytes]
+        self.log: list[bytes] = []
 
 
 @dataclass
@@ -99,8 +99,8 @@ def split128(val: int):
 def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     lines: list[str] | str,
     return_stack=True,
-    context: EvalContext or None = None,
-    debug: IO or None = None,
+    context: EvalContext | None = None,
+    debug: IO | None = None,
 ) -> tuple[list, list]:
     """
     Simulate a basic teal program.
@@ -123,9 +123,9 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
     if not isinstance(lines, list):
         raise TypeError("lines must be a list of strings or a string")
 
-    stack: list[int | str] = []
+    stack: list[int | bytes] = []
     call_stack: list[Frame] = []
-    slots = [0 for _ in range(256)]
+    slots: list[int | bytes] = [0 for _ in range(256)]
     branch_targets = {
         line[:-1]: nr  # strip trailing ":" from key, ex. b11: -> b11
         for nr, line in enumerate(lines)
@@ -158,14 +158,14 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
         prev_op = op
         op = line_s[0]
         args = line_s[1:]
+        res: int | bytes  # defined here to satisfy mypy
+        x: int | bytes  # defined here to satisfy mypy
         if op == "err":
             raise Panic("Encountered error opcode", current_line)
         if op == "dup":
-            x = stack[-1]
-            stack.append(x)
+            stack.append(stack[-1])
         elif op == "dup2":
-            x = stack[-2], stack[-1]
-            stack.extend(x)
+            stack.extend((stack[-2], stack[-1]))
         elif op == "pop":
             stack.pop()
         elif op == "mulw":
@@ -514,6 +514,8 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             key = stack.pop()
             if context is None:
                 raise EvaluatorError("app_global_get requires execution environment context", current_line)
+            if not isinstance(key, bytes):
+                raise Panic("app_global_get key must be a bytes value", current_line)
             val = context.global_state.get(key, 0)
             stack.append(val)
         elif op == "app_global_get_ex":
@@ -534,12 +536,16 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             a = stack.pop()
             if context is None:
                 raise EvaluatorError("app_global_put requires execution environment context", current_line)
+            if not isinstance(a, bytes):
+                raise Panic("app_global_put key must be a bytes value", current_line)
             context.global_state[a] = b
             if len(context.global_state) > MaxGlobalStateSize:
                 raise Panic("Global state size exceeded", current_line)
         elif op == "app_local_get":
             b = stack.pop()
             a = stack.pop()
+            if context is None:
+                raise EvaluatorError("app_local_get requires execution environment context", current_line)
             if a != 0:
                 raise EvaluatorError(
                     "app_local_get is only supported with 0 as the account parameter",
@@ -552,6 +558,8 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             key = stack.pop()
             app = stack.pop()
             account = stack.pop()
+            if context is None:
+                raise EvaluatorError("app_local_get_ex requires execution environment context", current_line)
             if app != 0 or account != 0:
                 raise EvaluatorError(
                     "app_local_get_ex is only supported with 0 as the account and application parameter", current_line
@@ -566,6 +574,8 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             c = stack.pop()
             b = stack.pop()
             a = stack.pop()
+            if context is None:
+                raise EvaluatorError("app_local_put requires execution environment context", current_line)
             if a != 0:
                 raise Panic(
                     "app_local_put is only supported with 0 as the account parameter",
@@ -676,6 +686,10 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             stack.append(res)
         # provisional support for txna
         elif op == "txna":
+            if context is None:
+                raise EvaluatorError("txna requires execution environment context", current_line)
+            if context.txn is None:
+                raise EvaluatorError("txna requires app call txn to be specified in EvalContext", current_line)
             if args[0] == "ApplicationArgs":
                 arg_index = int(args[1])
                 if arg_index > len(context.txn.app_args):
@@ -690,13 +704,13 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             arg = line[5:]
             if arg[0] == '"' and arg[-1] == '"':
                 arg = arg[1:-1]  # strip quotes
-                arg = arg.encode("utf-8")
+                encoded = arg.encode("utf-8")
             elif arg.startswith("0x"):
                 arg = arg[2:]
-                arg = bytes.fromhex(arg)
+                encoded = bytes.fromhex(arg)
             else:
                 raise Panic("byte requires string or hex value", current_line)
-            stack.append(arg)
+            stack.append(encoded)
         elif op == "int":
             x = int(args[0])
             if x < 0 or x >= INTEGER_SIZE:

@@ -22,7 +22,9 @@ class InnerTxn(Expr):
 
     def __init__(self, **kwargs: Optional[Expr]):
         super().__init__()
-        fields_to_exprs = {TxnField[name]: expr for name, expr in kwargs.items() if expr is not None}
+        fields_to_exprs: dict[TxnField, Expr | list[Expr]] = {
+            TxnField[name]: expr for name, expr in kwargs.items() if expr is not None
+        }
 
         self.expr = InnerTxnBuilder.SetFields(fields_to_exprs)
 
@@ -454,7 +456,7 @@ def MakeInnerGroupTxn(*txns: InnerTxn) -> Expr:
     for txn in txns:
         if not isinstance(txn, InnerTxn):
             raise ValueError("MakeInnerGroupTxn can only take instances of InnerTxn as parameters")
-    steps = []
+    steps: list[Expr] = []
     for i, txn in enumerate(txns):
         steps.append(txn)
         if i == len(txns) - 1:

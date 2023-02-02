@@ -19,7 +19,9 @@ class AutoLoadScratchVar(Expr):
     ```
     """
 
-    def __init__(self, type: TealType = TealType.anytype, slotId: int = None):  # pylint: disable=redefined-builtin
+    def __init__(
+        self, type: TealType = TealType.anytype, slotId: int | None = None
+    ):  # pylint: disable=redefined-builtin
         self.scratch_var = ScratchVar(type, slotId)
         Expr.__init__(self)
 

@@ -15,11 +15,12 @@ class State:
             name: a key in the global state, if it's a string it will be converted to Bytes
             type_hint: a type which is expected to be stored, will be checked with each put()
         """
+        self._name: Expr
+        self.type_hint = type_hint
         if isinstance(name, str):
             self._name = Bytes(name)
         else:
-            self._name = name  # type: Expr
-        self.type_hint = type_hint
+            self._name = name
 
     def put(self, value: Expr) -> App:
         """
@@ -33,7 +34,7 @@ class State:
         """
         raise NotImplementedError
 
-    def exists(self) -> App:
+    def exists(self) -> Expr:
         """
         Check if the key of this state variable is present in current app's schema.
         """
@@ -153,7 +154,7 @@ class LocalStateArray2D(StateArray):
     Wrapper for local state access which utilizes multiple slots in local state organized in 2D array
     """
 
-    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
+    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):  # type: ignore
         length, width = indices
         return LocalStateArray(self.key_at_index(length), self.type_hint)[width]
 
@@ -172,6 +173,6 @@ class GlobalStateArray2D(StateArray):
     Wrapper for global state access which utilizes multiple slots in global state organized in 2D array
     """
 
-    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
+    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):  # type: ignore
         length, width = indices
         return GlobalStateArray(self.key_at_index(length), self.type_hint)[width]

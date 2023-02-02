@@ -36,7 +36,7 @@ class CompareAndSelect(Expr):
             type_name = f"CompareAndSelect({str(self.op)})"
         return f"({type_name} {str(self.lhs)} {str(self.rhs)})"
 
-    def _get_steps(self) -> Iterator[TealOp or Expr]:
+    def _get_steps(self) -> Iterator[TealOp | Expr]:
         """
         Steps of the program described in TEAL
         """

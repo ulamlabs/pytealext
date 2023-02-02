@@ -1,5 +1,5 @@
 import re
-from typing import IO
+from typing import IO, Optional
 
 from pyteal import MAX_PROGRAM_VERSION, Expr, Mode, compileTeal
 
@@ -20,10 +20,10 @@ def compile_and_run(
     mode: Mode = Mode.Application,
     *,
     version: int = MAX_PROGRAM_VERSION,
-    context: EvalContext = None,
-    debug: IO = None,
-    tmpl_subs: dict[str, str] = None
-) -> tuple[list[bytes or int], list[bytes or int]]:
+    context: Optional[EvalContext] = None,
+    debug: Optional[IO] = None,
+    tmpl_subs: Optional[dict[str, str]] = None
+) -> tuple[list[bytes | int], list[bytes | int]]:
     """Compile the given AST and run it using eval_teal
 
     Should the given AST contain any Tmpl expressions,
