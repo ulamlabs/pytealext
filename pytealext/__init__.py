@@ -1,5 +1,6 @@
 from . import evaluator
 from .assemble import assemble_steps
+from .auto_load_scratch_var import AutoLoadScratchVar
 from .cas import BytesMax, BytesMin, CompareAndSelect, Max, Min
 from .fastexp import FastExp
 from .inner_transactions import (
@@ -35,6 +36,7 @@ from .state import (
 
 __all__ = [
     "assemble_steps",
+    "AutoLoadScratchVar",
     "evaluator",
     "CompareAndSelect",
     "ExtractSL",

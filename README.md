@@ -7,6 +7,7 @@ Additional useful operations for Python
 - `Min`, `Max`: calculate minimum/maximum of 2 expressions, without using slots or evaluating arguments more than once (TEAL 4+)
 - `LazyAnd`, `LazyOr`: lazily evaluate arguments in And/Or operation
 - `SaturatingAdd`, `SaturatingSub`: saturating addition/subtraction
+- `AutoLoadScratchVar`: more convenient way to use scratch variables. Removes the need to use `.load()` everytime, adds `.increment()` method.
 - [Inner Transactions](https://github.com/ulamlabs/pytealext/blob/main/docs/inner_transactions.md): simplified making of inner transactions
     - `MakeInnerPaymentTxn`, `MakeInnerAssetTransferTxn` and more!
     - `MakeInnerGroupTxn` to execute inner atomic group transactions

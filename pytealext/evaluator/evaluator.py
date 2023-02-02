@@ -38,6 +38,13 @@ class AssertionFailed(Panic):
         super().__init__("Assert failed", line_number)
 
 
+class EvaluatorError(Panic):
+    """Exception class used when the evauator encounters an error caused by improper use of the evaluator.
+
+    This also includes errors from unimplemented features.
+    """
+
+
 MaxLogCalls = 32
 MaxLogSize = 1024
 MaxStringSize = 4096
@@ -506,16 +513,16 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
         elif op == "app_global_get":
             key = stack.pop()
             if context is None:
-                raise Exception("app_global_get requires execution environment context")
+                raise EvaluatorError("app_global_get requires execution environment context", current_line)
             val = context.global_state.get(key, 0)
             stack.append(val)
         elif op == "app_global_get_ex":
             key = stack.pop()
             app = stack.pop()
             if context is None:
-                raise Exception("app_global_get_ex requires execution environment context")
+                raise EvaluatorError("app_global_get_ex requires execution environment context", current_line)
             if app != 0:
-                raise Exception("Accessing other app's global state is unsupported")
+                raise EvaluatorError("Accessing other app's global state is unsupported", current_line)
             if not isinstance(key, bytes):
                 raise Panic("app_global_get_ex key must be a bytes value", current_line)
             val = context.global_state.get(key, 0)
@@ -526,7 +533,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             b = stack.pop()
             a = stack.pop()
             if context is None:
-                raise Exception("app_global_put requires execution environment context")
+                raise EvaluatorError("app_global_put requires execution environment context", current_line)
             context.global_state[a] = b
             if len(context.global_state) > MaxGlobalStateSize:
                 raise Panic("Global state size exceeded", current_line)
@@ -534,7 +541,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             b = stack.pop()
             a = stack.pop()
             if a != 0:
-                raise Exception(
+                raise EvaluatorError(
                     "app_local_get is only supported with 0 as the account parameter",
                     current_line,
                 )
@@ -546,7 +553,9 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             app = stack.pop()
             account = stack.pop()
             if app != 0 or account != 0:
-                raise Exception("app_local_get_ex is only supported with 0 as the account and application parameter")
+                raise EvaluatorError(
+                    "app_local_get_ex is only supported with 0 as the account and application parameter", current_line
+                )
             if not isinstance(key, bytes):
                 raise Panic("app_local_get_ex key must be a bytes value", current_line)
             val = context.local_state.get(key, 0)
@@ -572,7 +581,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             if not isinstance(val, bytes):
                 raise Panic("log requires bytes value", current_line)
             if context is None:
-                raise Exception("log requires execution environment context")
+                raise EvaluatorError("log requires execution environment context", current_line)
             context.log.append(val)
             if sum(len(log) for log in context.log) > MaxLogSize:
                 raise Panic("log size limit exceeded", current_line)
@@ -673,7 +682,7 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
                     raise Panic("txna ApplicationArgs index out of bounds", current_line)
                 stack.append(context.txn.app_args[arg_index])
             else:
-                raise Exception("Unsupported txna expression")
+                raise EvaluatorError("Unsupported txna expression", current_line)
         elif op == "addr":
             arg = args[0]
             stack.append(decode_address(arg))
@@ -773,6 +782,17 @@ def eval_teal(  # pylint: disable=too-many-locals,too-many-branches,too-many-sta
             i = int(args[0])
             x = slots[i]
             stack.append(x)
+        elif op == "stores":
+            b = stack.pop()
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("stores expects integer slot ID", current_line)
+            slots[a] = b
+        elif op == "loads":
+            a = stack.pop()
+            if not isinstance(a, int):
+                raise Panic("loads expects integer slot ID", current_line)
+            stack.append(slots[a])
         else:
-            raise Exception(f"Operation '{line}'(line={current_line}) is not supported by the simulator")
+            raise EvaluatorError(f"Operation '{line}' is not supported by the simulator", current_line)
     return stack, slots

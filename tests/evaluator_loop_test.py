@@ -45,7 +45,6 @@ def pyteal_fib(n: Expr) -> Expr:
 
 def test_pyteal_fibonacci():
     for i in range(0, 43):
-
         stack, slots = compile_and_run(pyteal_fib(Int(i)))
 
         if i >= 2:
