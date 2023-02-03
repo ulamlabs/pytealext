@@ -1,5 +1,3 @@
-from typing import Union
-
 from hypothesis import assume, given
 from hypothesis import strategies as st
 from pyteal import And, Expr, Int, Not, Or
@@ -68,18 +66,18 @@ def test_min(lhs: int, rhs: int):
 
 
 @given(tree=st.recursive(u64_strategy, lambda children: st.tuples(children, children)))
-def test_min_recursive(tree: Union[tuple, int]):
+def test_min_recursive(tree: tuple | int):
     """
     Fun experiment with generating random trees of Min
     """
     assume(isinstance(tree, tuple))
 
-    def find_min(node: Union[tuple, int]) -> int:
+    def find_min(node: tuple | int) -> int:
         if isinstance(node, int):
             return node
         return min(find_min(node[0]), find_min(node[1]))
 
-    def assemble_ast(node: Union[tuple, int]) -> Expr:
+    def assemble_ast(node: tuple | int) -> Expr:
         if isinstance(node, int):
             return Int(node)
         lhs, rhs = node

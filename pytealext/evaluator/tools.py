@@ -1,5 +1,5 @@
 import re
-from typing import IO, Optional
+from typing import IO
 
 from pyteal import MAX_PROGRAM_VERSION, Expr, Mode, compileTeal
 
@@ -20,9 +20,9 @@ def compile_and_run(
     mode: Mode = Mode.Application,
     *,
     version: int = MAX_PROGRAM_VERSION,
-    context: Optional[EvalContext] = None,
-    debug: Optional[IO] = None,
-    tmpl_subs: Optional[dict[str, str]] = None
+    context: EvalContext | None = None,
+    debug: IO | None = None,
+    tmpl_subs: dict[str, str] | None = None
 ) -> tuple[list[bytes | int], list[bytes | int]]:
     """Compile the given AST and run it using eval_teal
 
