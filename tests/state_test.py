@@ -70,7 +70,7 @@ def test_global_state_array_2D(array_2d_class):
         ("ccc", b"sugoma"),
     ],
 )
-def test_local_get_ex(key: str, val: bytes or int):
+def test_local_get_ex(key: str, val: bytes | int):
     ls = LocalState(key)
     if isinstance(val, bytes):
         val = Bytes(val)
@@ -95,7 +95,7 @@ def test_local_get_ex(key: str, val: bytes or int):
         ("ccc", b"sugoma"),
     ],
 )
-def test_global_get_ex(key: str, val: bytes or int):
+def test_global_get_ex(key: str, val: bytes | int):
     gs = GlobalState(key)
     if isinstance(val, bytes):
         val = Bytes(val)

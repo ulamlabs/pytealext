@@ -1,5 +1,3 @@
-from typing import Union
-
 from hypothesis import assume, given
 from hypothesis import strategies as st
 from pyteal import And, Expr, Int, Not, Or
@@ -21,8 +19,8 @@ def test_lazyand_boolean_equivalence_with_and(vals: list):
     """
     Test if LazyAnd and And produce the same outcomes
     """
-    ast_lazy_and = LazyAnd(*[Int(val) for val in vals])
-    ast_and = And(*[Int(val) for val in vals])
+    ast_lazy_and: Expr = LazyAnd(*[Int(val) for val in vals])
+    ast_and: Expr = And(*[Int(val) for val in vals])
 
     # convert to booleans
     ast_lazy_and = Bool(ast_lazy_and)
@@ -42,8 +40,8 @@ def test_lazyor_boolean_equivalence_with_or(vals: list):
     """
     Test if LazyOr and Or produce the same outcomes
     """
-    ast_lazy_or = LazyOr(*vals)
-    ast_or = Or(*vals)
+    ast_lazy_or: Expr = LazyOr(*vals)
+    ast_or: Expr = Or(*vals)
 
     # convert to booleans
     ast_lazy_or = Bool(ast_lazy_or)
@@ -68,18 +66,18 @@ def test_min(lhs: int, rhs: int):
 
 
 @given(tree=st.recursive(u64_strategy, lambda children: st.tuples(children, children)))
-def test_min_recursive(tree: Expr):
+def test_min_recursive(tree: tuple | int):
     """
     Fun experiment with generating random trees of Min
     """
     assume(isinstance(tree, tuple))
 
-    def find_min(node: Union[tuple, int]) -> int:
+    def find_min(node: tuple | int) -> int:
         if isinstance(node, int):
             return node
         return min(find_min(node[0]), find_min(node[1]))
 
-    def assemble_ast(node: Union[tuple, int]) -> Expr:
+    def assemble_ast(node: tuple | int) -> Expr:
         if isinstance(node, int):
             return Int(node)
         lhs, rhs = node

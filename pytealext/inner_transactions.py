@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pyteal import (
     CompileOptions,
     Expr,
@@ -20,9 +18,11 @@ class InnerTxn(Expr):
     It is equivalent to the InnerTxnBuilder.SetFields(...) expression.
     """
 
-    def __init__(self, **kwargs: Optional[Expr]):
+    def __init__(self, **kwargs: Expr | None):
         super().__init__()
-        fields_to_exprs = {TxnField[name]: expr for name, expr in kwargs.items() if expr is not None}
+        fields_to_exprs: dict[TxnField, Expr | list[Expr]] = {
+            TxnField[name]: expr for name, expr in kwargs.items() if expr is not None
+        }
 
         self.expr = InnerTxnBuilder.SetFields(fields_to_exprs)
 
@@ -82,11 +82,11 @@ def MakeInnerTxn(**kwargs: Expr) -> Expr:
 
 
 def InnerPaymentTxn(
-    sender: Optional[Expr] = None,
-    receiver: Optional[Expr] = None,
-    amount: Optional[Expr] = None,
-    close_remainder_to: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    receiver: Expr | None = None,
+    amount: Expr | None = None,
+    close_remainder_to: Expr | None = None,
+    fee: Expr | None = None,
 ) -> InnerTxn:
     """
     Create an inner txn and set provided fields.
@@ -103,11 +103,11 @@ def InnerPaymentTxn(
 
 
 def MakeInnerPaymentTxn(
-    sender: Optional[Expr] = None,
-    receiver: Optional[Expr] = None,
-    amount: Optional[Expr] = None,
-    close_remainder_to: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    receiver: Expr | None = None,
+    amount: Expr | None = None,
+    close_remainder_to: Expr | None = None,
+    fee: Expr | None = None,
 ) -> Expr:
     """
     Create and execute an inner payment txn.
@@ -129,12 +129,12 @@ def MakeInnerPaymentTxn(
 
 
 def InnerAssetTransferTxn(
-    sender: Optional[Expr] = None,
-    asset_receiver: Optional[Expr] = None,
-    asset_amount: Optional[Expr] = None,
-    xfer_asset: Optional[Expr] = None,
-    asset_close_to: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    asset_receiver: Expr | None = None,
+    asset_amount: Expr | None = None,
+    xfer_asset: Expr | None = None,
+    asset_close_to: Expr | None = None,
+    fee: Expr | None = None,
 ) -> InnerTxn:
     """
     Create an inner txn and set provided fields.
@@ -151,12 +151,12 @@ def InnerAssetTransferTxn(
 
 
 def MakeInnerAssetTransferTxn(
-    sender: Optional[Expr] = None,
-    asset_receiver: Optional[Expr] = None,
-    asset_amount: Optional[Expr] = None,
-    xfer_asset: Optional[Expr] = None,
-    asset_close_to: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    asset_receiver: Expr | None = None,
+    asset_amount: Expr | None = None,
+    xfer_asset: Expr | None = None,
+    asset_close_to: Expr | None = None,
+    fee: Expr | None = None,
 ) -> Expr:
     """
     Create and execute an inner asset transfer.
@@ -179,11 +179,11 @@ def MakeInnerAssetTransferTxn(
 
 
 def InnerAssetFreezeTxn(
-    sender: Optional[Expr] = None,
-    freeze_asset: Optional[Expr] = None,
-    freeze_asset_account: Optional[Expr] = None,
-    freeze_asset_frozen: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    freeze_asset: Expr | None = None,
+    freeze_asset_account: Expr | None = None,
+    freeze_asset_frozen: Expr | None = None,
+    fee: Expr | None = None,
 ) -> InnerTxn:
     """
     Create an inner txn and set provided fields.
@@ -200,11 +200,11 @@ def InnerAssetFreezeTxn(
 
 
 def MakeInnerAssetFreezeTxn(
-    sender: Optional[Expr] = None,
-    freeze_asset: Optional[Expr] = None,
-    freeze_asset_account: Optional[Expr] = None,
-    freeze_asset_frozen: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    freeze_asset: Expr | None = None,
+    freeze_asset_account: Expr | None = None,
+    freeze_asset_frozen: Expr | None = None,
+    fee: Expr | None = None,
 ) -> Expr:
     """
     Create and execute inner asset freeze transaction
@@ -223,20 +223,20 @@ def MakeInnerAssetFreezeTxn(
 
 
 def InnerAssetConfigTxn(
-    sender: Optional[Expr] = None,
-    config_asset: Optional[Expr] = None,
-    config_asset_total: Optional[Expr] = None,
-    config_asset_default_frozen: Optional[Expr] = None,
-    config_asset_unit_name: Optional[Expr] = None,
-    config_asset_name: Optional[Expr] = None,
-    config_asset_manager: Optional[Expr] = None,
-    config_asset_reserve: Optional[Expr] = None,
-    config_asset_freeze: Optional[Expr] = None,
-    config_asset_clawback: Optional[Expr] = None,
-    config_asset_url: Optional[Expr] = None,
-    config_asset_metadata_hash: Optional[Expr] = None,
-    config_asset_decimals: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    config_asset: Expr | None = None,
+    config_asset_total: Expr | None = None,
+    config_asset_default_frozen: Expr | None = None,
+    config_asset_unit_name: Expr | None = None,
+    config_asset_name: Expr | None = None,
+    config_asset_manager: Expr | None = None,
+    config_asset_reserve: Expr | None = None,
+    config_asset_freeze: Expr | None = None,
+    config_asset_clawback: Expr | None = None,
+    config_asset_url: Expr | None = None,
+    config_asset_metadata_hash: Expr | None = None,
+    config_asset_decimals: Expr | None = None,
+    fee: Expr | None = None,
 ) -> InnerTxn:
     """
     Create and execute an inner asset config transaction.
@@ -255,20 +255,20 @@ def InnerAssetConfigTxn(
 
 
 def MakeInnerAssetConfigTxn(
-    sender: Optional[Expr] = None,
-    config_asset: Optional[Expr] = None,
-    config_asset_total: Optional[Expr] = None,
-    config_asset_default_frozen: Optional[Expr] = None,
-    config_asset_unit_name: Optional[Expr] = None,
-    config_asset_name: Optional[Expr] = None,
-    config_asset_manager: Optional[Expr] = None,
-    config_asset_reserve: Optional[Expr] = None,
-    config_asset_freeze: Optional[Expr] = None,
-    config_asset_clawback: Optional[Expr] = None,
-    config_asset_url: Optional[Expr] = None,
-    config_asset_metadata_hash: Optional[Expr] = None,
-    config_asset_decimals: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    config_asset: Expr | None = None,
+    config_asset_total: Expr | None = None,
+    config_asset_default_frozen: Expr | None = None,
+    config_asset_unit_name: Expr | None = None,
+    config_asset_name: Expr | None = None,
+    config_asset_manager: Expr | None = None,
+    config_asset_reserve: Expr | None = None,
+    config_asset_freeze: Expr | None = None,
+    config_asset_clawback: Expr | None = None,
+    config_asset_url: Expr | None = None,
+    config_asset_metadata_hash: Expr | None = None,
+    config_asset_decimals: Expr | None = None,
+    fee: Expr | None = None,
 ) -> Expr:
     """
     Create and execute inner asset configure transaction
@@ -311,21 +311,21 @@ def MakeInnerAssetConfigTxn(
 
 
 def InnerApplicationCallTxn(
-    sender: Optional[Expr] = None,
-    application_id: Optional[Expr] = None,
-    on_completion: Optional[Expr] = None,
-    application_args: Optional[list[Expr]] = None,
-    accounts: Optional[list[Expr]] = None,
-    applications: Optional[list[Expr]] = None,
-    assets: Optional[list[Expr]] = None,
-    approval_program: Optional[Expr] = None,
-    clear_state_program: Optional[Expr] = None,
-    global_num_byte_slices: Optional[Expr] = None,
-    global_num_uints: Optional[Expr] = None,
-    local_num_byte_slices: Optional[Expr] = None,
-    local_num_uints: Optional[Expr] = None,
-    extra_program_pages: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    application_id: Expr | None = None,
+    on_completion: Expr | None = None,
+    application_args: list[Expr] | None = None,
+    accounts: list[Expr] | None = None,
+    applications: list[Expr] | None = None,
+    assets: list[Expr] | None = None,
+    approval_program: Expr | None = None,
+    clear_state_program: Expr | None = None,
+    global_num_byte_slices: Expr | None = None,
+    global_num_uints: Expr | None = None,
+    local_num_byte_slices: Expr | None = None,
+    local_num_uints: Expr | None = None,
+    extra_program_pages: Expr | None = None,
+    fee: Expr | None = None,
 ) -> InnerTxn:
     """
     Create an inner txn and set provided fields.
@@ -344,21 +344,21 @@ def InnerApplicationCallTxn(
 
 
 def MakeInnerApplicationCallTxn(
-    sender: Optional[Expr] = None,
-    application_id: Optional[Expr] = None,
-    on_completion: Optional[Expr] = None,
-    application_args: Optional[list[Expr]] = None,
-    accounts: Optional[list[Expr]] = None,
-    applications: Optional[list[Expr]] = None,
-    assets: Optional[list[Expr]] = None,
-    approval_program: Optional[Expr] = None,
-    clear_state_program: Optional[Expr] = None,
-    global_num_byte_slices: Optional[Expr] = None,
-    global_num_uints: Optional[Expr] = None,
-    local_num_byte_slices: Optional[Expr] = None,
-    local_num_uints: Optional[Expr] = None,
-    extra_program_pages: Optional[Expr] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    application_id: Expr | None = None,
+    on_completion: Expr | None = None,
+    application_args: list[Expr] | None = None,
+    accounts: list[Expr] | None = None,
+    applications: list[Expr] | None = None,
+    assets: list[Expr] | None = None,
+    approval_program: Expr | None = None,
+    clear_state_program: Expr | None = None,
+    global_num_byte_slices: Expr | None = None,
+    global_num_uints: Expr | None = None,
+    local_num_byte_slices: Expr | None = None,
+    local_num_uints: Expr | None = None,
+    extra_program_pages: Expr | None = None,
+    fee: Expr | None = None,
 ) -> Expr:
     """
     Create an inner application call transaction.
@@ -387,13 +387,13 @@ def MakeInnerApplicationCallTxn(
 
 
 def InnerNoOpTxn(
-    sender: Optional[Expr] = None,
-    application_id: Optional[Expr] = None,
-    application_args: Optional[list[Expr]] = None,
-    accounts: Optional[list[Expr]] = None,
-    applications: Optional[list[Expr]] = None,
-    assets: Optional[list[Expr]] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    application_id: Expr | None = None,
+    application_args: list[Expr] | None = None,
+    accounts: list[Expr] | None = None,
+    applications: list[Expr] | None = None,
+    assets: list[Expr] | None = None,
+    fee: Expr | None = None,
 ) -> InnerTxn:
     """
     Create an inner no op application call txn and set provided fields.
@@ -414,13 +414,13 @@ def InnerNoOpTxn(
 
 
 def MakeInnerNoOpTxn(
-    sender: Optional[Expr] = None,
-    application_id: Optional[Expr] = None,
-    application_args: Optional[list[Expr]] = None,
-    accounts: Optional[list[Expr]] = None,
-    applications: Optional[list[Expr]] = None,
-    assets: Optional[list[Expr]] = None,
-    fee: Optional[Expr] = None,
+    sender: Expr | None = None,
+    application_id: Expr | None = None,
+    application_args: list[Expr] | None = None,
+    accounts: list[Expr] | None = None,
+    applications: list[Expr] | None = None,
+    assets: list[Expr] | None = None,
+    fee: Expr | None = None,
 ) -> Expr:
     """
     Create an inner no-op application call transaction.
@@ -454,7 +454,7 @@ def MakeInnerGroupTxn(*txns: InnerTxn) -> Expr:
     for txn in txns:
         if not isinstance(txn, InnerTxn):
             raise ValueError("MakeInnerGroupTxn can only take instances of InnerTxn as parameters")
-    steps = []
+    steps: list[Expr] = []
     for i, txn in enumerate(txns):
         steps.append(txn)
         if i == len(txns) - 1:

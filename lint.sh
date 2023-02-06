@@ -22,3 +22,4 @@ echo "Formatting..."
 black . $black_flags
 isort . $isort_flags
 pylint pytealext
+mypy pytealext

@@ -20,10 +20,10 @@ def compile_and_run(
     mode: Mode = Mode.Application,
     *,
     version: int = MAX_PROGRAM_VERSION,
-    context: EvalContext = None,
-    debug: IO = None,
-    tmpl_subs: dict[str, str] = None
-) -> tuple[list[bytes or int], list[bytes or int]]:
+    context: EvalContext | None = None,
+    debug: IO | None = None,
+    tmpl_subs: dict[str, str] | None = None
+) -> tuple[list[bytes | int], list[bytes | int]]:
     """Compile the given AST and run it using eval_teal
 
     Should the given AST contain any Tmpl expressions,

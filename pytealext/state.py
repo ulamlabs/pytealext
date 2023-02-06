@@ -1,5 +1,3 @@
-from typing import Union
-
 from pyteal import App, Bytes, Concat, Expr, Int, Itob, MaybeValue, Seq, TealType
 from pyteal.types import require_type
 
@@ -9,17 +7,18 @@ class State:
     Wrapper around state vars.
     """
 
-    def __init__(self, name: Union[str, Expr], type_hint: TealType = TealType.anytype):
+    def __init__(self, name: str | Expr, type_hint: TealType = TealType.anytype):
         """
         Args:
             name: a key in the global state, if it's a string it will be converted to Bytes
             type_hint: a type which is expected to be stored, will be checked with each put()
         """
+        self._name: Expr
+        self.type_hint = type_hint
         if isinstance(name, str):
             self._name = Bytes(name)
         else:
-            self._name = name  # type: Expr
-        self.type_hint = type_hint
+            self._name = name
 
     def put(self, value: Expr) -> App:
         """
@@ -33,7 +32,7 @@ class State:
         """
         raise NotImplementedError
 
-    def exists(self) -> App:
+    def exists(self) -> Expr:
         """
         Check if the key of this state variable is present in current app's schema.
         """
@@ -109,7 +108,7 @@ class StateArray:
     Wrapper for state access which utilizes multiple slots
     """
 
-    def __init__(self, prefix: Union[str, Expr], type_hint: TealType = TealType.anytype):
+    def __init__(self, prefix: str | Expr, type_hint: TealType = TealType.anytype):
         """
         Args:
             prefix: a key prefix in the global state, if it's a string it will be converted to Bytes.
@@ -118,7 +117,7 @@ class StateArray:
         self._prefix = prefix
         self.type_hint = type_hint
 
-    def key_at_index(self, index: Union[int, Expr]) -> Expr:
+    def key_at_index(self, index: int | Expr) -> Expr:
         """
         Get the actual key (bytes) that will be used to access the state information
         """
@@ -135,7 +134,7 @@ class StateArray:
             # index: Expr, prefix: Expr (u64)
             return Concat(self._prefix, Itob(index))
 
-    def __getitem__(self, index: Union[int, Expr]):
+    def __getitem__(self, index: int | Expr):
         raise NotImplementedError
 
 
@@ -144,7 +143,7 @@ class LocalStateArray(StateArray):
     Wrapper for local state access which utilizes multiple slots in local state
     """
 
-    def __getitem__(self, index: Union[int, Expr]):
+    def __getitem__(self, index: int | Expr):
         return LocalState(self.key_at_index(index), self.type_hint)
 
 
@@ -153,7 +152,7 @@ class LocalStateArray2D(StateArray):
     Wrapper for local state access which utilizes multiple slots in local state organized in 2D array
     """
 
-    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
+    def __getitem__(self, indices: tuple[int | Expr, int | Expr]):  # type: ignore
         length, width = indices
         return LocalStateArray(self.key_at_index(length), self.type_hint)[width]
 
@@ -163,7 +162,7 @@ class GlobalStateArray(StateArray):
     Wrapper for global state access which utilizes multiple slots in global state
     """
 
-    def __getitem__(self, index: Union[int, Expr]):
+    def __getitem__(self, index: int | Expr):
         return GlobalState(self.key_at_index(index), self.type_hint)
 
 
@@ -172,6 +171,6 @@ class GlobalStateArray2D(StateArray):
     Wrapper for global state access which utilizes multiple slots in global state organized in 2D array
     """
 
-    def __getitem__(self, indices: tuple[Union[int, Expr], Union[int, Expr]]):
+    def __getitem__(self, indices: tuple[int | Expr, int | Expr]):  # type: ignore
         length, width = indices
         return GlobalStateArray(self.key_at_index(length), self.type_hint)[width]

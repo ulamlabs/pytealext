@@ -112,7 +112,7 @@ class DeserializeIntegers:  # pylint: disable=too-few-public-methods
         else:
             raise ValueError(f"Invalid width: {width}")
 
-    def __getitem__(self, index: int or Expr) -> Expr:
+    def __getitem__(self, index: int | Expr) -> Expr:
         if isinstance(index, int):
             return self.ExtractUint(self.serialized, Int(index * self.bytes_width))
 
@@ -120,7 +120,7 @@ class DeserializeIntegers:  # pylint: disable=too-few-public-methods
         return self.ExtractUint(self.serialized, index * Int(self.bytes_width))
 
 
-def DeserializeIntegersToSlots(serialized: Expr, *slots: ScratchVar or ScratchSlot, width: int = 64) -> Expr:
+def DeserializeIntegersToSlots(serialized: Expr, *slots: ScratchVar | ScratchSlot, width: int = 64) -> Expr:
     """
     Deserialize bytes into a sequence of integers.
     The deserialized integers are put in the provided slots.
